@@ -1,0 +1,1 @@
+flask --app graph run --debug
