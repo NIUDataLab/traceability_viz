@@ -16,20 +16,21 @@ def grab_data():
 #def post(num):
     #return str(num * num)
 
-'''@app.route('/calc', methods=['POST'])
-def calc():
-    data = request.get_json()
-    start_node = data['start_node']
-    start_distance = data['start_distance']
-    print(start_node, start_distance)
+# ctrl + / to comment lines. Make sure mutiple things are selected.
+# @app.route('/calc', methods=['POST'])
+# def calc():
+#     data = request.get_json()
+#     start_node = data['start_node']
+#     start_distance = data['start_distance']
+#     print(start_node, start_distance)
 
-    # Load data from the JSON file
-    graph_data = json.loads(grab_data())
-    #print(graph_data)
-    # code to do the actual traversal
+#     # Load data from the JSON file
+#     graph_data = json.loads(grab_data())
+#     #print(graph_data)
+#     # code to do the actual traversal
 
 
-    return "Data received"'''
+#     return "Data received"
 
 @app.route('/data.json')
 def index():
