@@ -19,8 +19,21 @@
       }
 
       #single-node-container, #start-node-distance-container  {
-  height: 1000px;
-}
+        height: 1000px;
+      }
+
+      #path-display, #total-risk-display {
+        position: absolute;
+        right: 0;
+      }
+
+      #path-display {
+        top: 20px; /* Adjust this value to align with your header */
+      }
+
+      #total-risk-display {
+        top: 40px; /* Adjust this value to prevent overlap with #path */
+      }
     </style>
     
     <div id="options-selection"></div>
@@ -54,7 +67,10 @@
   </label>
   <input type="text" id="distance-input"/>
   <div id="start-node-distance-container"></div>
+  <div id="path-display"></div>
+  <div id="total-risk-display"></div>
   </div>
+
 
 
     <!-- Add this to your HTML file -->

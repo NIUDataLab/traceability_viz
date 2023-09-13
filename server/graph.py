@@ -1,4 +1,4 @@
-from flask import Flask, render_template, Response, request
+from flask import Flask, render_template, Response, request, jsonify
 import json
 import heapq
 from flask_cors import CORS # for sending data as a response
@@ -75,7 +75,7 @@ def calc():
     print("Total cost:", distance)
 
 
-    return "hi"
+    return jsonify({'path': path, 'edge_weights': edge_weights, 'distance': distance})
 
 def nearest_neighbor_traversal_no_cycles(graph, start_node, max_distance):
     current_node = start_node

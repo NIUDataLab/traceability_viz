@@ -45,13 +45,13 @@ for (const node of Object.keys(parsed_data)) {
 
 // Print node data
 single_node_graph_view.forEachNode((nodeId, attributes) => {
-    console.log(`Node ${nodeId}:`, attributes);
-  });
+  console.log(`Node ${nodeId}:`, attributes);
+});
   
-  // Print edge data
-  single_node_graph_view.forEachEdge((edgeId, attributes, source, target) => {
-    console.log(`Edge ${edgeId} from ${source} to ${target}:`, attributes);
-  });
+// Print edge data
+single_node_graph_view.forEachEdge((edgeId, attributes, source, target) => {
+  console.log(`Edge ${edgeId} from ${source} to ${target}:`, attributes);
+});
 
 
   //const positions = random(graph);
@@ -60,7 +60,7 @@ single_node_graph_view.forEachNode((nodeId, attributes) => {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 //const renderer = new Sigma(graph_distance_view, distance_container);
 
-const modeSelect = document.querySelector("#mode-select") as HTMLSelectElement;
+const modeSelect = document.querySelector("#mode-select") as HTMLSelectElement; //this can either be null as well
 
 const single_node_section = document.getElementById("single-node-section") as HTMLInputElement;
 
@@ -104,7 +104,7 @@ if (single_node_section) {
       // Check if the Enter key was pressed
       if (event.key === "Enter") {
         // Get the value entered by the user
-        const nodeLabel =single_node_input.value; //change this still
+        const nodeLabel = single_node_input.value; //change this still
   
       // Find a node with a matching label
       const selectedNode = single_node_graph_view
@@ -132,7 +132,7 @@ if (single_node_section) {
         //updateColor(graph_distance_view, selectedNode);
         
 
-        // Get the relationship data for the selected node
+  // Get the relationship data for the selected node
   const relationships = parsed_data[selectedNode];
 
   // Calculate the minimum and maximum relationship values
@@ -234,24 +234,21 @@ function updateColor(graph: Graph, selectedNode: string) {
   setTimeout(() => updateColor(graph, selectedNode), 1000); // 1000ms = 1s delay
 }*/
 
-let start_node_distance_renderer: Sigma | null;
-
 const start_node_input = document.getElementById("start-node-input") as HTMLInputElement;
 const distance_input = document.getElementById("distance-input") as HTMLInputElement;
 
-if (start_node_input && distance_input) { //This is the function that is still not formatted and needs to be worked on.
+/*if (start_node_input && distance_input) { //This is the function that is still not formatted and needs to be worked on.
   distance_input.addEventListener("keydown", (event) => {
     // Check if the Enter key was pressed
     if (event.key === "Enter") {
         console.log("we are in");
 
-        //REMEMBER TO DO CHECKS FOR BOTH DISTANCE AND NODE ENTERED IF THEY ARE INVALID.
+      //REMEMBER TO DO CHECKS FOR BOTH DISTANCE AND NODE ENTERED IF THEY ARE INVALID.
 
       const start_node = start_node_input.value;
       const start_distance = Number(distance_input.value);
 
       // Send the data to the Flask server
-      const num = 5;
       fetch('http://127.0.0.1:5000/calc', {
         method: 'POST',
         headers: {
@@ -259,16 +256,147 @@ if (start_node_input && distance_input) { //This is the function that is still n
         },
         body: JSON.stringify({ start_node, start_distance })
       })
-        .then((response) => response.text())
+        .then((response) => response.json())
         .then((data) => {
            // Update the page content with the data received from the server
            console.log(data);
+
+           path = data.path;
+           edge_weights = data.edge_weights;
+           total_risk = data.distance;
         });
 
       console.log(start_node, start_distance);
     }
   });
+}*/
+
+//this function will wait using async, until the server recieves a response. Once it does, we read the data into path 
+//edge_weights, and total_risk. This function can be altered so that distances and other items can be taken into it.
+let path: string[];
+let edge_weights: string[];
+let total_risk: string[];
+
+async function fetchData() {
+  const start_node = start_node_input.value;
+  const start_distance = Number(distance_input.value);
+
+  const response = await fetch('http://127.0.0.1:5000/calc', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ start_node, start_distance })
+  });
+
+  const data = await response.json();
+
+  path = data.path;
+  edge_weights = data.edge_weights;
+  total_risk = data.distance;
+
+  console.log("path:", path);
+  console.log("edge_weights:", edge_weights);
+  console.log("total_risk:", total_risk)
 }
+
+const start_node_distance_graph = new Graph();
+let start_node_distance_renderer: Sigma | null;
+const start_node_distance_container = document.getElementById("start-node-distance-container") as HTMLElement;
+
+if (start_node_input && distance_input) {
+  distance_input.addEventListener("keydown", async (event) => { //make the event listener async
+    if (event.key === "Enter") {
+      await fetchData();// wait for fetchData to complete
+      console.log("we read the data: ", path);
+      let graphWidth = 10; // Adjust this value to suit your needs
+
+      // Clear the distance graph before adding nodes
+      start_node_distance_graph.clear();
+
+      for (let i = 0; i < path.length; i++)
+      {
+        let x = (graphWidth / (path.length - 1)) * i;
+        let y = Math.random() * 4 + 5; // Add randomness to the height
+
+        // If its the first first node, make it bigger and a different color
+        if (i === 0)
+        {
+          start_node_distance_graph.addNode(path[i], { 
+          x: x, 
+          y: y, 
+          size: 7, 
+          label: "CWE " + path[i], 
+          color: "red" 
+        });
+        } else 
+        {
+          start_node_distance_graph.addNode(path[i], { 
+            x: x, 
+            y: y, 
+            size: 5, 
+            label: "CWE " + path[i], 
+            color: "blue" 
+          });
+        }
+      }
+
+      console.log("we made it past the node read!");
+
+      // Add edges to the graph
+      for (let i = 0; i < path.length - 1; i++) {
+        let weight = parseFloat(edge_weights[i]);
+        start_node_distance_graph.addEdge(path[i], path[i + 1], {
+          id: 'e' + i,
+          source: path[i],
+          target: path[i + 1],
+          label: 'Edge' + i,
+          size: weight * 2,
+          color: '#000'
+        });
+      }
+
+      console.log("Edges added to the graph!");
+
+      // Assuming path and total_risk are defined
+      let path_display = document.getElementById('path-display');
+      let total_risk_display = document.getElementById('total-risk-display');
+
+      if (path_display)
+      {
+        path_display.textContent = 'Path: ' + path.join(' -> ');
+        console.log(path_display.textContent); // Add this line  
+      }
+
+      if (total_risk_display)
+      {
+        total_risk_display.textContent = 'Total Risk: ' + total_risk;
+        console.log(total_risk_display.textContent); // And this line
+      }
+
+      // Check if the third container element was found
+      if (!start_node_distance_container) {
+        console.error(
+        "Error: Could not find second container element on the page"
+      );
+      } else {
+        console.log("good");
+        // Check if a second Sigma instance already exists
+        if (start_node_distance_renderer) {
+          console.log("perfect!!!!");
+          // Remove the existing Sigma instance
+          start_node_distance_renderer.kill();
+          start_node_distance_renderer = null;
+      }
+
+      // Create a new Sigma instance and render the graph in the third container
+      start_node_distance_renderer = new Sigma(start_node_distance_graph, start_node_distance_container);
+    }
+      
+    }
+  });
+}
+
 
 
 
