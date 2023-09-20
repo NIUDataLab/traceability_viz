@@ -16,12 +16,60 @@ function Get(yourUrl:string){
 }
 
 const single_node_container = document.getElementById("single-node-container") as HTMLElement;
+
+let parsed_data: any;
+
+// Declare the single_node_renderer variable with a type
+let single_node_renderer: Sigma | null;
+
+document.getElementById('data-select')?.addEventListener('change', (event) => {
+  const selectedOption = (event.target as HTMLSelectElement).value;
+
+  // Reset the single-node-input input field
+  (document.getElementById('single-node-input') as HTMLInputElement).value = '';
+
+  single_node_graph_view.clear(); // Clear the graph
+  if (single_node_renderer != null)
+  {
+    single_node_renderer.kill();
+    single_node_renderer = null;
+  }
+
+  if (!selectedOption)
+  {
+    alert('Please choose a data set to work with!');
+    return;
+  }
+
+  fetch('http://127.0.0.1:5000/different.json', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: `data_type=${selectedOption}`,
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);
+    // 'data' is now a JavaScript object that you can work with
+    parsed_data = data;
+
+    for (const node of Object.keys(parsed_data)) {
+      single_node_graph_view.addNode(node, { label: node } );
+  }
+  });
+});
+
+
+
+
+//const single_node_container = document.getElementById("single-node-container") as HTMLElement;
 //const temp_c = document.getElementById("temp") as HTMLElement;
 
-const raw_data = Get("http://127.0.0.1:5000/data.json"); // this stores raw data, still needs to be converted
-const parsed_data = JSON.parse(raw_data); // this converts the data to JSON object format
+//const raw_data = Get("http://127.0.0.1:5000/data.json"); // this stores raw data, still needs to be converted
+//const parsed_data = JSON.parse(raw_data); // this converts the data to JSON object format
 
-console.log(parsed_data);
+//console.log(parsed_data);
 
 const single_node_graph_view = new Graph();
 
@@ -30,9 +78,9 @@ const single_node_graph_view = new Graph();
 
 //graph.addEdge("John", "Mary");
 
-for (const node of Object.keys(parsed_data)) {
+/*for (const node of Object.keys(parsed_data)) {
     single_node_graph_view.addNode(node, { label: node } );
-}
+}*/
 
 /*for (const node of Object.keys(parsed_data)) //for reading edges later on into the graph
 {
@@ -66,12 +114,16 @@ const single_node_section = document.getElementById("single-node-section") as HT
 
 const start_node_distance_section = document.getElementById("start-node-distance-section") as HTMLInputElement;
 
+const better_traversal = document.getElementById("better-traversal-section") as HTMLInputElement;
+
 if (modeSelect) {
   modeSelect.addEventListener("change", () => {
     const mode = modeSelect.value;
 
     single_node_section.style.display = "none";
     start_node_distance_section.style.display = "none";
+    better_traversal.style.display = "none";
+    
 
 
     if (mode === "single-node")
@@ -82,16 +134,16 @@ if (modeSelect) {
     {
       start_node_distance_section.style.display = "block";
     }
-    else
+    else if (mode === "better-traversal-visual")
     {
-
+      better_traversal.style.display = "block";
     }
 });
 }
     
 
 // Declare the single_node_renderer variable with a type
-let single_node_renderer: Sigma | null;
+//let single_node_renderer: Sigma | null;
   
 console.log("ok");
 
@@ -397,7 +449,41 @@ if (start_node_input && distance_input) {
   });
 }
 
+const better_traversal_input = document.getElementById("better-traversal-input") as HTMLInputElement;
+const better_distance_input = document.getElementById("better-distance-input") as HTMLInputElement;
 
+if (better_traversal_input && better_distance_input) {
+  better_distance_input.addEventListener("keydown", async (event) => { //make the event listener async
+    if (event.key === "Enter") {
+      await better_fetchData();// wait for fetchData to complete
+    }
+  });
+}
+
+async function better_fetchData() {
+  const start_node = better_traversal_input.value;
+  const start_distance = Number(better_distance_input.value);
+
+  const response = await fetch('http://127.0.0.1:5000/newcalc', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ start_node, start_distance })
+  });
+
+  const data = await response.json();
+
+  //path = data.path;
+  //edge_weights = data.edge_weights;
+  //total_risk = data.distance;
+
+  //console.log("path:", path);
+  //console.log("edge_weights:", edge_weights);
+  //console.log("total_risk:", total_risk)
+
+  console.log("data")
+}
 
 
 

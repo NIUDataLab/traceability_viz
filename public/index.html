@@ -18,7 +18,15 @@
         overflow: hidden;
       }
 
-      #single-node-container, #start-node-distance-container  {
+      /*#single-node-container, #start-node-distance-container  {
+        height: 1000px;
+      }*/
+
+      #start-node-distance-container {
+        height: 80vh; /* Adjust this value as needed */
+      }
+
+      #single-node-container {
         height: 1000px;
       }
 
@@ -44,7 +52,28 @@
       <option value="single-node">Single node</option>
       <option value="start-end-nodes">Start and end nodes</option>
       <option value="start-node-distance">Start node and distance</option>
+      <option value="better-traversal-visual">Better Version</option>
+    </select>
+    <label for=""data-set-select">Choose the data to work with:</label>
+    <select id="data-select">
+      <option value="">Select data...</option>
+      <option value="CWE">CWE</option>
+      <option value="CAPEC">CAPEC</option>
     </select></div>
+
+
+
+    <div id="better-traversal-section" style="display: none;">
+    <label for="better-traversal-input">
+      Enter a start node:
+    </label>
+    <input type="text" id="better-traversal-input"/>
+  
+    <label for="better-distance-input">
+      Enter a distance:
+    </label>
+    <input type="text" id="better-distance-input"/>
+  </div>
 
 
     <div id="single-node-section" style="display: none;">
