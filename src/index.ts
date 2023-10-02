@@ -15,6 +15,39 @@ function Get(yourUrl:string){
     return Httpreq.responseText;          
 }
 
+window.onload = () => {
+  // Get the mode select and data select elements
+  const modeSelect = document.getElementById('mode-select') as HTMLSelectElement;
+  const dataSelect = document.getElementById('data-select') as HTMLSelectElement;
+
+  // Disable the mode select dropdown initially
+  modeSelect.disabled = true;
+
+  // Enable the mode select dropdown when an option is selected from the data select dropdown
+  dataSelect.addEventListener('change', function() {
+    if (this.value) {
+      modeSelect.disabled = false;
+    } else {
+      modeSelect.disabled = true;
+    }
+  });
+};
+
+// Get the select element
+const dataSelect = document.getElementById('data-select') as HTMLSelectElement;
+
+// Add an event listener for the change event
+dataSelect.addEventListener('change', () => {
+  // Get the default option
+  const defaultOption = dataSelect.querySelector('option[value=""]');
+
+  // If a value is selected, remove the default option
+  if (dataSelect.value && defaultOption) {
+    defaultOption.remove();
+  }
+});
+
+
 const single_node_container = document.getElementById("single-node-container") as HTMLElement;
 
 let parsed_data: any;
@@ -24,6 +57,7 @@ let single_node_renderer: Sigma | null;
 
 document.getElementById('data-select')?.addEventListener('change', (event) => {
   const selectedOption = (event.target as HTMLSelectElement).value;
+  single_node_legend.style.display = "none";
 
   // Reset the single-node-input input field
   (document.getElementById('single-node-input') as HTMLInputElement).value = '';
@@ -34,6 +68,28 @@ document.getElementById('data-select')?.addEventListener('change', (event) => {
     single_node_renderer.kill();
     single_node_renderer = null;
   }
+
+  start_node_distance_graph.clear();
+  if (start_node_distance_renderer != null)
+  {
+    start_node_distance_renderer.kill();
+    start_node_distance_renderer = null;
+  }
+
+  // Reset the single-node-input input field
+  (document.getElementById('start-node-input') as HTMLInputElement).value = '';
+  (document.getElementById('distance-input') as HTMLInputElement).value = '';
+  // Get the elements
+  const pathDisplay = document.getElementById('path-display');
+  const totalRiskDisplay = document.getElementById('total-risk-display');
+
+  // Set their content to nothing
+  if (pathDisplay) {
+    pathDisplay.innerHTML = '';
+  }
+  if (totalRiskDisplay) {
+    totalRiskDisplay.innerHTML = '';
+  } 
 
   if (!selectedOption)
   {
@@ -55,8 +111,9 @@ document.getElementById('data-select')?.addEventListener('change', (event) => {
     parsed_data = data;
 
     for (const node of Object.keys(parsed_data)) {
+      console.log("node:", node)
       single_node_graph_view.addNode(node, { label: node } );
-  }
+    }
   });
 });
 
@@ -72,6 +129,7 @@ document.getElementById('data-select')?.addEventListener('change', (event) => {
 //console.log(parsed_data);
 
 const single_node_graph_view = new Graph();
+
 
 //graph.addNode("John", { x: 0, y: 10, size: 5, label: "John", color: "blue" });
 //graph.addNode("Mary", { x: 10, y: 0, size: 3, label: "Mary", color: "red" });
@@ -125,7 +183,6 @@ if (modeSelect) {
     better_traversal.style.display = "none";
     
 
-
     if (mode === "single-node")
     {
       single_node_section.style.display = "block";
@@ -149,12 +206,15 @@ console.log("ok");
 
 const single_node_input = document.querySelector("#single-node-input") as HTMLInputElement;
 
+const single_node_legend = document.querySelector("#legend") as HTMLDivElement;
+
 
 if (single_node_section) {
     // Listen for keydown events on the input element
     single_node_section.addEventListener("keydown", (event) => {
       // Check if the Enter key was pressed
       if (event.key === "Enter") {
+        single_node_legend.style.display = "block";
         // Get the value entered by the user
         const nodeLabel = single_node_input.value; //change this still
   
@@ -251,6 +311,57 @@ if (single_node_section) {
 
             // Create a new Sigma instance and render the graph in the third container
             single_node_renderer = new Sigma(single_node_graph_view, single_node_container);
+
+            // Assuming single_node_renderer is initialized somewhere...
+            if (single_node_renderer) {
+              (single_node_renderer).on('clickNode', function(e: any) {
+                // Get the clicked node's id
+                var nodeId = e.node;
+                console.log("Clicked on node with ID:", nodeId);
+
+                var nodeName = "gg"/* Get the real name of the node */;
+                var nodeDescription = "hello"/* Get the description of the node */;
+                //var nodeX = e.data.node['renderer1:x'];
+                //var nodeY = e.data.node['renderer1:y'];
+            
+                // Update the content of the info box
+                var infoBox = document.getElementById('info-box');
+                if (infoBox) {
+                  // Update the content of the info box
+                  infoBox.innerHTML = 'Name: ' + nodeName + '<br>Description: ' + nodeDescription;
+            
+                  // Update the position of the info box
+                  //infoBox.style.left = nodeX + 'px';
+                  //infoBox.style.top = nodeY + 'px';
+            
+                  // Show the info box
+                  infoBox.style.display = 'block';
+                }
+
+
+
+
+                //console.log("Clicked on node with ID:", nodeId);
+                //var nodeId = e.data.node.id;
+                
+
+                // Fetch the description for this node
+                fetch('http://127.0.0.1:5000/descriptions.json', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/x-www-form-urlencoded',
+                  },
+                  body: `node_id=${nodeId}`,
+                })
+                .then(response => response.json())  // Use json() instead of text()
+                .then(responseJson => {
+                    console.log(responseJson);
+                });
+
+
+              });
+            }
+
         }
 
       } else {

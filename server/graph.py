@@ -7,31 +7,106 @@ from dijkstar import Graph, find_path
 app = Flask(__name__)
 CORS(app)
 
+last_data = None
+
 def grab_data():
     with open("cwe2cwesbert.json", "r") as f:
         data = f.read()
     return data 
 
 def get_data():
+    global last_data
     data_type = request.form.get('data_type')
     if data_type == 'CWE':
         with open("cwe2cwesbert.json", "r") as f:
-            data = f.read()
+            last_data = f.read()
     elif data_type == 'CAPEC':
-        with open("minor_map.json", "r") as f:
-            data = f.read()
+        with open("score_test(capec2capec[sbert]).json", "r") as f:
+            last_data = f.read()
     else:
         return jsonify({'error': 'Invalid data type'}), 400
-    return data  
+    return last_data 
+
+'''def get_description():
+    try:
+        data_type = request.form.get('data_type')
+        if data_type == 'CWE':
+            with open("inputfile[CachedWeakness].json", "r", encoding='utf-8') as f:
+                data = json.load(f)
+                # Create a new list to store the filtered data
+                filtered_data = []
+                for item in data['data']:
+                    # Extract only the id, name, and description fields
+                    filtered_item = {
+                        'id': item['value']['id'],
+                        'name': item['value']['name'],
+                        'description': item['value']['description']
+                    }
+                    filtered_data.append(filtered_item)
+                print(filtered_data)
+                print("we have printed the filtered data")
+        elif data_type == 'CAPEC':
+            return
+        else:
+            return jsonify({'error': 'Invalid data type'}), 400
+        return jsonify(filtered_data)
+    except Exception as e:
+        print(f"An error occurred: {e}")'''
+
+def get_description():
+    try:
+        node_id = request.form.get('node_id')
+        print("node_id:", node_id)
+        with open("inputfile[CachedWeakness].json", "r", encoding='utf-8') as f:
+            data_str = f.read()
+            data = json.loads(data_str)
+            # Find the data for this node
+            node_data = next((item for item in data['data'] if item['value']['id'] == node_id), None)
+            if node_data is None:
+                return jsonify({'error': 'Node not found'}), 404
+            print("node_data:", node_data)  # Print the node data
+        return node_data  # Return all data about the node as a dictionary
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return jsonify({'error': 'An error occurred'}), 500
+
+# to uncomment out multiple lines click control slash.
+
+@app.route('/descriptions.json', methods=['POST'])
+def descriptions_post():
+    node_data = get_description()
+    resp = jsonify(node_data)  # Ensure the response is JSON
+    resp.headers.add('Access-Control-Allow-Origin', '*') 
+    return resp
+
+
+'''def get_description():
+    try:
+        data_type = request.form.get('data_type')
+        if data_type == 'CWE':
+            with open("inputfile[CachedWeakness].json", "r", encoding='utf-8') as f:
+                data = f.read()
+                print(data)
+                print("we have printed the data")
+        elif data_type == 'CAPEC':
+            return
+        else:
+            return jsonify({'error': 'Invalid data type'}), 400
+        return data
+    except Exception as e:
+        print(f"An error occurred: {e}")'''
+
+
 
 @app.route('/different.json', methods=['POST'])
-def multiple():
+def multiple_post():
     ##print(grab_data())
+    get_description()
+    print("data sent")
     resp = Response(response=get_data(), status=200)
     resp.headers.add('Access-Control-Allow-Origin', '*') ## the asterisk allows anyone to look at this data file 
     return resp
     ##return render_template('test.html')###
-
 
 #@app.route('/calc/<int:num>')
 #def post(num):
@@ -63,12 +138,13 @@ def index():
 
 @app.route('/calc', methods=['POST'])
 def calc():
+    global last_data
     data = request.get_json()
     start_node = data['start_node']
     max_distance = data['start_distance']
 
     # Load data from the JSON file
-    graph_data = json.loads(grab_data())
+    graph_data = json.loads(last_data)
 
     # Find the minimum and maximum edge weight
     min_weight = min(min(neighbors.values()) for neighbors in graph_data.values())
@@ -136,7 +212,7 @@ def new_calc():
     print(start_node, " ", max_distance)
 
     # Load data from the JSON file
-    graph_data = json.loads(grab_data())
+    graph_data = json.loads(get_data())
 
     # Find the minimum and maximum edge weight
     min_weight = min(min(neighbors.values()) for neighbors in graph_data.values())
