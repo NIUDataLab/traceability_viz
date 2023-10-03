@@ -7,6 +7,7 @@ import Graph from "graphology";
 import Sigma from "sigma";
 import random from 'graphology-layout/random';
 import chroma, { distance } from "chroma-js";
+import './index_2'; //you must include this here
 
 function Get(yourUrl:string){
     var Httpreq = new XMLHttpRequest(); // a new request
