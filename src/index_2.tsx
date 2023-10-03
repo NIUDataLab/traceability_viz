@@ -1,14 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Panel from './Panel';
+import DescriptionPanel from './description_panel';
+import './styles.css'
 
 ReactDOM.render(
   <React.StrictMode>
-    <Panel title="My Panel">
-      <p>This is the content of the panel.</p>
-    </Panel>
+    <DescriptionPanel />
   </React.StrictMode>,
   document.getElementById('root')
 );
+
 
 
