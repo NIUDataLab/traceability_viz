@@ -7,7 +7,7 @@ import Panel from "./Panel";
 const DescriptionPanel: FC = () => {
   return (
     <Panel
-      initiallyDeployed
+      initiallyDeployed //this option if included, opens the panel automatically. If not the panel will open closed.
       title={
         <>
           <BsInfoCircle className="text-muted" /> Description
