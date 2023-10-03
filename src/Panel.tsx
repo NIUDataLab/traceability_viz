@@ -20,7 +20,7 @@ const Panel: FC<{ title: JSX.Element | string; initiallyDeployed?: boolean; chil
   }, [isDeployed]);
 
   return (
-    <div className="panel" ref={dom}>
+    <div id="description-panel" className="panel panels" ref={dom}>
       <h2>
         {title}{" "}
         <button type="button" onClick={() => setIsDeployed((v) => !v)}>
