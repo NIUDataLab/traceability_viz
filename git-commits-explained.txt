@@ -6,3 +6,5 @@ git pull origin main //this pulls the contents of the updated main branch to you
 git checkout development //this switches from main branch to development branch.
 git merge main //this merges main branch with the development branch, updating the changes made, so the 
 development branch will now be up-to-date.
+git push //We need this in order to finalize the changes made locally, and push them so it updates on github itself.
+If we do not do a git push, development will remain out of date on the repository.
