@@ -294,6 +294,8 @@ if (single_node_section) {
 
    // Calculate the distance of the node from the selected node
 //const distance = Math.pow(1 - normalizedRelationship, 2) * (containerWidth / 4);
+
+console.log("Data set used: ", dataSelect.value);
         
         // Check if the third container element was found
         if (!single_node_container) {
@@ -324,6 +326,17 @@ if (single_node_section) {
                 var nodeDescription = "hello"/* Get the description of the node */;
                 //var nodeX = e.data.node['renderer1:x'];
                 //var nodeY = e.data.node['renderer1:y'];
+
+                var nodeLink;
+
+                if (dataSelect.value === 'CWE')
+                {
+                  nodeLink = 'https://cwe.mitre.org/data/definitions/' + nodeId + '.html';
+                }
+                else if (dataSelect.value === 'CAPEC')
+                {
+                  nodeLink = 'https://capec.mitre.org/data/definitions/' + nodeId + '.html';
+                }
             
                 // Update the content of the info box
                 var infoBox = document.getElementById('info-box');
@@ -334,6 +347,9 @@ if (single_node_section) {
                   // Update the position of the info box
                   //infoBox.style.left = nodeX + 'px';
                   //infoBox.style.top = nodeY + 'px';
+
+                  // Add a hyperlink to the info box
+                  infoBox.innerHTML += '<br><a href="' + nodeLink + '" target="_blank">Link to Node</a>';
             
                   // Show the info box
                   infoBox.style.display = 'block';
@@ -489,8 +505,8 @@ if (start_node_input && distance_input) {
           start_node_distance_graph.addNode(path[i], { 
           x: x, 
           y: y, 
-          size: 7, 
-          label: "CWE " + path[i], 
+          size: 6, 
+          label: path[i], 
           color: "red" 
         });
         } else 
@@ -498,8 +514,8 @@ if (start_node_input && distance_input) {
           start_node_distance_graph.addNode(path[i], { 
             x: x, 
             y: y, 
-            size: 5, 
-            label: "CWE " + path[i], 
+            size: 6, 
+            label: path[i], 
             color: "blue" 
           });
         }

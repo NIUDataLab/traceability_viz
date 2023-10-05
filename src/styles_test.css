@@ -1,0 +1,66 @@
+@import url("https://fonts.googleapis.com/css2?family=Lora&family=Public+Sans:ital@0;1&display=swap");
+
+:root {
+    --ruby: #e22653;
+    --grey: #999;
+    --dark-grey: #666;
+    --light-grey: #ccc;
+    --cream: #f9f7ed;
+    --transparent-white: #ffffffcc;
+    --transition: all ease-out 300ms;
+    --shadow: 0 1px 5px var(--dark-grey);
+    --hover-opacity: 0.7;
+    --stage-padding: 8px;
+    --panels-width: 350px;
+    --border-radius: 3px;
+  }
+
+/**
+ * BASE STYLES:
+ * ************
+ */
+body {
+    font-family: "Public Sans", sans-serif;
+    background: white;
+    font-size: 0.9em;
+    overflow: hidden;
+  }
+  h1,
+  h2 {
+    font-family: Lora, serif;
+  }
+  h2 {
+    font-size: 1.3em;
+    margin: 0;
+  }
+  h2 > * {
+    vertical-align: text-top;
+  }
+  a {
+    color: black !important;
+  }
+  a:hover {
+    opacity: var(--hover-opacity);
+  }
+
+.panel-container {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 350px;
+    max-height: calc(100vh - 2 * var(--stage-padding));
+    overflow-y: auto;
+    padding: var(--stage-padding);
+    scrollbar-width: thin;
+}
+
+.panel {
+    background: white;
+    padding: 1em;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    /*width: 100%;*/
+  }
+  .panel:not(:last-child) {
+    margin-bottom: 0.5em;
+  }

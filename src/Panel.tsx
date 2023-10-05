@@ -1,3 +1,6 @@
+// FYI basically this is the animation feature to keep panels from overlapping. 
+// Without this, when a panel is opened to obtain more information, issues happen with overlapping.
+// There is animation being used here for opening and moving panels on top of one another.
 import React, { FC, useEffect, useRef, useState, ReactNode } from "react";
 import { MdExpandLess, MdExpandMore } from "react-icons/md";
 import AnimateHeight from "react-animate-height";

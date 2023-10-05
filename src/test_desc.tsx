@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import SingleNodeDescriptionPanel from './single_node_description_panel';
 import DescriptionPanel from './description_panel';
-import './styles.css'
+import NearestNeighborTravDescriptionPanel from './nearest_neighbor_traversal_description';
+import NodeDisplay from './node_display';
+//import './styles.css'
+import './styles_test.css'
 // Import the other description panels...
 
 function App() {
@@ -22,9 +25,11 @@ function App() {
   }, []);
 
   return (
-    <div>
-      {mode === 'single-node' && <SingleNodeDescriptionPanel />}
+    <div className="panel-container">
       {mode === '' && <DescriptionPanel />}
+      {mode === 'single-node' && <SingleNodeDescriptionPanel />}
+      {mode === '' && <NodeDisplay />}
+      {mode === 'start-node-distance' && <NearestNeighborTravDescriptionPanel />}
       {/* Add similar lines for the other modes... */}
     </div>
   );

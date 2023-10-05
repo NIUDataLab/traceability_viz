@@ -55,7 +55,7 @@
     margin: 0;
     padding: 0;
   }
- /* #root {
+  /*#root {
     width: 100vw;
     height: 100vh;
     position: relative;
@@ -192,7 +192,8 @@
     box-shadow: var(--shadow);
   }
   .panel:not(:last-child) {
-    margin-bottom: 0.5em;
+    /*margin-bottom: 0.5em;*/
+    margin-bottom: 4em;
   }
   .panel h2 button {
     float: right;
@@ -262,5 +263,5 @@
     height: 100%;
     background: var(--dark-grey);
     transition: var(--transition);
-  } 
+  }
 
