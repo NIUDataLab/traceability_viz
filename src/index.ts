@@ -34,9 +34,11 @@ window.onload = () => {
   });
 };
 
-// Get the select element
+// Get the data select element, either CWE or CAPEC.
 const dataSelect = document.getElementById('data-select') as HTMLSelectElement;
 
+// Lines 42-49 - The following block of code is strictly for removing the inital Select data... option.
+// Once a data set is selected, this option will never appear again.
 // Add an event listener for the change event
 dataSelect.addEventListener('change', () => {
   // Get the default option
@@ -48,21 +50,29 @@ dataSelect.addEventListener('change', () => {
   }
 });
 
-
+//retrieving single_node_container from html file
 const single_node_container = document.getElementById("single-node-container") as HTMLElement;
 
+// used to store the data from the file where we have the nodes stored
 let parsed_data: any;
+
+// used to store the descriptions from the file where the descriptions are stored
+let node_descriptions_data: any;
 
 // Declare the single_node_renderer variable with a type
 let single_node_renderer: Sigma | null;
 
+//Event listener to check to see the option selected. 
 document.getElementById('data-select')?.addEventListener('change', (event) => {
-  const selectedOption = (event.target as HTMLSelectElement).value;
-  single_node_legend.style.display = "none";
+  const selectedOption = (event.target as HTMLSelectElement).value; // saving the value of the selected option
+  single_node_legend.style.display = "none"; //this will soon be removed
 
   // Reset the single-node-input input field
   (document.getElementById('single-node-input') as HTMLInputElement).value = '';
 
+  // Lines 73-100 are all resets of the graphs and input fields.
+  // This is just when the user switches data sets.
+  // It does not make sense to keep the results when we switch data sets.
   single_node_graph_view.clear(); // Clear the graph
   if (single_node_renderer != null)
   {
@@ -92,12 +102,18 @@ document.getElementById('data-select')?.addEventListener('change', (event) => {
     totalRiskDisplay.innerHTML = '';
   } 
 
+  // This should never happen, just in case selectedOption is somehow empty, we stop.
   if (!selectedOption)
   {
     alert('Please choose a data set to work with!');
     return;
   }
 
+  // This first fetch retrieves the data, from different.json.
+  // Basically, we fetch the data, but to do that we need to send the SelectedOption value over.
+  // Once the server has that, it send the data set we want back.
+  // We then print the data to the console, to check.
+  // Finally, we save the data into parsed_data.
   fetch('http://127.0.0.1:5000/different.json', {
     method: 'POST',
     headers: {
@@ -111,15 +127,33 @@ document.getElementById('data-select')?.addEventListener('change', (event) => {
     // 'data' is now a JavaScript object that you can work with
     parsed_data = data;
 
+    // Reading and adding the nodes into the single_node_graph_view
     for (const node of Object.keys(parsed_data)) {
       console.log("node:", node)
       single_node_graph_view.addNode(node, { label: node } );
     }
   });
+
+  // This fetch will retreive all description for the nodes, either for CAPEC or CWE.
+  // Similar to the last fetch, we retrieve this from all_node_description_data.
+  // To do this, once again the selectedOption value must first be sent over.
+  // In return, we get the dataset with the descriptions of the all the nodes.
+  // We then print it to the console, and save it into node_descriptions_data.
+  fetch('http://127.0.0.1:5000/all_node_description_data.json', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: `data_type=${selectedOption}`,
+  })
+  .then(response => response.json())
+  .then(data => {
+    //These are prints to check we are retrieving the data properly. 
+    console.log("Printing descriptions for all nodes: ")
+    console.log(data);
+    node_descriptions_data = data;
+  })
 });
-
-
-
 
 //const single_node_container = document.getElementById("single-node-container") as HTMLElement;
 //const temp_c = document.getElementById("temp") as HTMLElement;
@@ -363,7 +397,7 @@ console.log("Data set used: ", dataSelect.value);
                 
 
                 // Fetch the description for this node
-                fetch('http://127.0.0.1:5000/descriptions.json', {
+                fetch('http://127.0.0.1:5000/descriptions_single.json', {
                   method: 'POST',
                   headers: {
                       'Content-Type': 'application/x-www-form-urlencoded',
