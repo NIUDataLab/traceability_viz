@@ -1,0 +1,8 @@
+This is directions for when main ends up ahead of the development branch, and development needs to be updated 
+with the changes. 
+The following are the commands to use:
+git checkout main //this is to switch branches from the development (work/test) branch to the main branch.
+git pull origin main //this pulls the contents of the updated main branch to your local device.
+git checkout development //this switches from main branch to development branch.
+git merge main //this merges main branch with the development branch, updating the changes made, so the 
+development branch will now be up-to-date.
