@@ -9,11 +9,13 @@ CORS(app)
 
 last_data = None
 
-def grab_data():
+# this is an old function that is no longer used
+def grab_data(): 
     with open("cwe2cwesbert.json", "r") as f:
         data = f.read()
     return data 
 
+# this function will retrieve either the CWE weighted file or the CAPEC one, depending on the option specified.
 def get_data():
     global last_data
     data_type = request.form.get('data_type')
@@ -27,33 +29,8 @@ def get_data():
         return jsonify({'error': 'Invalid data type'}), 400
     return last_data 
 
-'''def get_description():
-    try:
-        data_type = request.form.get('data_type')
-        if data_type == 'CWE':
-            with open("inputfile[CachedWeakness].json", "r", encoding='utf-8') as f:
-                data = json.load(f)
-                # Create a new list to store the filtered data
-                filtered_data = []
-                for item in data['data']:
-                    # Extract only the id, name, and description fields
-                    filtered_item = {
-                        'id': item['value']['id'],
-                        'name': item['value']['name'],
-                        'description': item['value']['description']
-                    }
-                    filtered_data.append(filtered_item)
-                print(filtered_data)
-                print("we have printed the filtered data")
-        elif data_type == 'CAPEC':
-            return
-        else:
-            return jsonify({'error': 'Invalid data type'}), 400
-        return jsonify(filtered_data)
-    except Exception as e:
-        print(f"An error occurred: {e}")'''
-
-def get_description():
+# this function is used to retrieve a single node description, when a user clicks on a node in the graph.
+def get_description_single():
     try:
         node_id = request.form.get('node_id')
         print("node_id:", node_id)
@@ -72,37 +49,44 @@ def get_description():
 
 # to uncomment out multiple lines click control slash.
 
-@app.route('/descriptions.json', methods=['POST'])
+# This function is used to read all the CWE and CAPEC descriptions from the input file. 
+def get_all_descriptions_data():
+    global last_data
+    data_type = request.form.get('data_type')
+    if data_type == 'CWE':
+        # encoding 'utf-8' is needed here, otherwise you will get errors. 
+        with open("inputfile[CachedWeakness].json", "r", encoding='utf-8') as f:
+            last_data = f.read()
+    elif data_type == 'CAPEC':
+        with open("inputfile[CachedWeakness].json", "r", encoding='utf-8') as f:
+            last_data = f.read()
+    else:
+        return jsonify({'error': 'Invalid data type'}), 400
+    return last_data 
+
+# This route will send all the description for the nodes over to be used on the website.
+@app.route('/all_node_description_data.json', methods=['POST'])
+def all_node_descriptions():
+    resp = Response(response=get_all_descriptions_data(), status=200)
+    resp.headers.add('Access-Control-Allow-Origin', '*') ## the asterisk allows anyone to look at this data file 
+    return resp
+
+# this is the route for the single description retrieval that will send the data over.
+@app.route('/descriptions_single.json', methods=['POST'])
 def descriptions_post():
-    node_data = get_description()
+    node_data = get_description_single()
     resp = jsonify(node_data)  # Ensure the response is JSON
     resp.headers.add('Access-Control-Allow-Origin', '*') 
     return resp
 
-
-'''def get_description():
-    try:
-        data_type = request.form.get('data_type')
-        if data_type == 'CWE':
-            with open("inputfile[CachedWeakness].json", "r", encoding='utf-8') as f:
-                data = f.read()
-                print(data)
-                print("we have printed the data")
-        elif data_type == 'CAPEC':
-            return
-        else:
-            return jsonify({'error': 'Invalid data type'}), 400
-        return data
-    except Exception as e:
-        print(f"An error occurred: {e}")'''
-
-
-
+# this is the route for retrieving the actual weighted data file data to send over to be used on the website
 @app.route('/different.json', methods=['POST'])
 def multiple_post():
     ##print(grab_data())
-    get_description()
-    print("data sent")
+    #print("Printing description data:")
+    #print(get_all_descriptions_data())
+    get_description_single() # printing to see if we have a valid description
+    print("data sent") # checking to see if data was sent, outputing to console.
     resp = Response(response=get_data(), status=200)
     resp.headers.add('Access-Control-Allow-Origin', '*') ## the asterisk allows anyone to look at this data file 
     return resp
