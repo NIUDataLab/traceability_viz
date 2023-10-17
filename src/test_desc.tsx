@@ -5,11 +5,13 @@ import DescriptionPanel from './description_panel';
 import NearestNeighborTravDescriptionPanel from './nearest_neighbor_traversal_description';
 import NodeDisplay from './node_display';
 import './styles.css'
-// Import the other description panels...
 
 function App() {
   const [mode, setMode] = useState('');
+  const [selectedOption, setSelectedOption] = useState('');
+  const [nodeDescriptionsData, setNodeDescriptionsData] = useState<{ data: any } | null>(null);
 
+  // First useEffect hook for adding the event listeners
   useEffect(() => {
     const modeSelect = document.getElementById('mode-select');
     const dataSelect = document.getElementById('data-select');
@@ -20,14 +22,39 @@ function App() {
       });
     }
 
-    // Do the same for dataSelect if needed...
-  }, []);
+    if (dataSelect) {
+      dataSelect.addEventListener('change', function(event) {
+        setSelectedOption((event.target as HTMLSelectElement).value);
+      });
+    }
+  }, []); // Empty dependency array so this runs only once when the component mounts
+
+  // Second useEffect hook for fetching the data
+  useEffect(() => {
+    if (!selectedOption) {
+      return;
+    }
+
+    fetch('http://127.0.0.1:5000/all_node_description_data.json', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `data_type=${selectedOption}`,
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log("Printing descriptions for all nodes for node_display element: ")
+      console.log(data);
+      setNodeDescriptionsData(data); // Store the data in state
+    });
+  }, [selectedOption]); // selectedOption as a dependency
 
   return (
     <div className="panel-container">
       {mode === '' && <DescriptionPanel />}
       {mode === 'single-node' && <SingleNodeDescriptionPanel />}
-      {mode === 'single-node' && <NodeDisplay />}
+      {mode === 'single-node' && <NodeDisplay nodeData={nodeDescriptionsData} />}
       {mode === 'start-node-distance' && <NearestNeighborTravDescriptionPanel />}
       {/* Add similar lines for the other modes... */}
     </div>
@@ -40,5 +67,8 @@ ReactDOM.render(
   </React.StrictMode>,
   document.getElementById('root')
 );
+
+
+
 
 
