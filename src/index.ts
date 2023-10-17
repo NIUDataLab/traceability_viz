@@ -129,7 +129,7 @@ document.getElementById('data-select')?.addEventListener('change', (event) => {
 
     // Reading and adding the nodes into the single_node_graph_view
     for (const node of Object.keys(parsed_data)) {
-      console.log("node:", node)
+      //console.log("node:", node)
       single_node_graph_view.addNode(node, { label: node } );
     }
   });
@@ -154,6 +154,8 @@ document.getElementById('data-select')?.addEventListener('change', (event) => {
     node_descriptions_data = data;
   })
 });
+
+//EVERYTHING UP TO THIS POINT IS PROPERLY DOCUMENTED
 
 //const single_node_container = document.getElementById("single-node-container") as HTMLElement;
 //const temp_c = document.getElementById("temp") as HTMLElement;
@@ -184,15 +186,15 @@ const single_node_graph_view = new Graph();
     }
 }*/
 
-// Print node data
-single_node_graph_view.forEachNode((nodeId, attributes) => {
+// Print node data DO NOT DELETE THESE TWO BLOCKS
+/*single_node_graph_view.forEachNode((nodeId, attributes) => {
   console.log(`Node ${nodeId}:`, attributes);
 });
   
 // Print edge data
 single_node_graph_view.forEachEdge((edgeId, attributes, source, target) => {
   console.log(`Edge ${edgeId} from ${source} to ${target}:`, attributes);
-});
+});*/
 
 
   //const positions = random(graph);
@@ -249,7 +251,7 @@ if (single_node_section) {
     single_node_section.addEventListener("keydown", (event) => {
       // Check if the Enter key was pressed
       if (event.key === "Enter") {
-        single_node_legend.style.display = "block";
+        //single_node_legend.style.display = "block";
         // Get the value entered by the user
         const nodeLabel = single_node_input.value; //change this still
   

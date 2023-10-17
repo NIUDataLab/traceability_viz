@@ -81,3 +81,37 @@ body {
     align-items: center;
     justify-content: center;
   }
+  .node-id:hover {
+    opacity: var(--hover-opacity);
+    cursor: pointer;
+  }
+
+  /* This is for the hover elements and styling around each node id */
+  .node-container {
+    border: 1px solid var(--dark-grey);
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+  }
+  .node-container:hover:not(.clicked) {
+    border-color: lightgray;
+    opacity: var(--hover-opacity);
+  }
+  
+  .node-container.clicked {
+    border-color: var(--dark-grey);
+    opacity: 1;
+  }
+  .node-link {
+    font-size: 0.8em; /* Adjust this value as needed */
+  }
+
+  /* useless right now */
+  /*.node-name {
+    font-size: 0.6em; /* Adjust this value as needed 
+  }*/
+  
+  
+  
+
