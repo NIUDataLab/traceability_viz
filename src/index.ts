@@ -8,6 +8,9 @@ import Sigma from "sigma";
 import random from 'graphology-layout/random';
 import chroma, { distance } from "chroma-js";
 import './test_desc'; //you must include this here
+import { EventEmitter } from 'events';
+
+export const eventEmitter = new EventEmitter();
 
 function Get(yourUrl:string){
     var Httpreq = new XMLHttpRequest(); // a new request
@@ -357,61 +360,7 @@ console.log("Data set used: ", dataSelect.value);
                 // Get the clicked node's id
                 var nodeId = e.node;
                 console.log("Clicked on node with ID:", nodeId);
-
-                var nodeName = "gg"/* Get the real name of the node */;
-                var nodeDescription = "hello"/* Get the description of the node */;
-                //var nodeX = e.data.node['renderer1:x'];
-                //var nodeY = e.data.node['renderer1:y'];
-
-                var nodeLink;
-
-                if (dataSelect.value === 'CWE')
-                {
-                  nodeLink = 'https://cwe.mitre.org/data/definitions/' + nodeId + '.html';
-                }
-                else if (dataSelect.value === 'CAPEC')
-                {
-                  nodeLink = 'https://capec.mitre.org/data/definitions/' + nodeId + '.html';
-                }
-            
-                // Update the content of the info box
-                var infoBox = document.getElementById('info-box');
-                if (infoBox) {
-                  // Update the content of the info box
-                  infoBox.innerHTML = 'Name: ' + nodeName + '<br>Description: ' + nodeDescription;
-            
-                  // Update the position of the info box
-                  //infoBox.style.left = nodeX + 'px';
-                  //infoBox.style.top = nodeY + 'px';
-
-                  // Add a hyperlink to the info box
-                  infoBox.innerHTML += '<br><a href="' + nodeLink + '" target="_blank">Link to Node</a>';
-            
-                  // Show the info box
-                  infoBox.style.display = 'block';
-                }
-
-
-
-
-                //console.log("Clicked on node with ID:", nodeId);
-                //var nodeId = e.data.node.id;
-                
-
-                // Fetch the description for this node
-                fetch('http://127.0.0.1:5000/descriptions_single.json', {
-                  method: 'POST',
-                  headers: {
-                      'Content-Type': 'application/x-www-form-urlencoded',
-                  },
-                  body: `node_id=${nodeId}`,
-                })
-                .then(response => response.json())  // Use json() instead of text()
-                .then(responseJson => {
-                    console.log(responseJson);
-                });
-
-
+                eventEmitter.emit('nodeClicked', nodeId);
               });
             }
 

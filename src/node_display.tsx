@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import type { FC } from "react";
 import { BsFillExclamationTriangleFill } from "react-icons/bs";
-
 import Panel from "./Panel";
+import { eventEmitter } from './index'; // Import the event emitter
 
 interface NodeProps {
   nodeData: { data: any } | null;
@@ -11,6 +11,22 @@ interface NodeProps {
 const NodeDisplay: FC<NodeProps> = ({ nodeData }) => {
   const [visibleNode, setVisibleNode] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [clickedNodeId, setClickedNodeId] = useState(null);
+
+  useEffect(() => {
+    // Subscribe to the 'nodeClicked' event
+    const handleNodeClick = (nodeId: any) => {
+      console.log('Received node ID:', nodeId); // Log the node ID
+      setClickedNodeId(nodeId);
+    };
+    
+    eventEmitter.on('nodeClicked', handleNodeClick);
+
+    // Clean up the subscription
+    return () => {
+      eventEmitter.off('nodeClicked', handleNodeClick);
+    };
+  }, []);
 
   const handleClick = (nodeId: any) => {
     if (visibleNode === nodeId) {
@@ -58,6 +74,7 @@ const NodeDisplay: FC<NodeProps> = ({ nodeData }) => {
 };
 
 export default NodeDisplay;
+
 
 
 
