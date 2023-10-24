@@ -111,6 +111,23 @@ body {
   /*.node-name {
     font-size: 0.6em; /* Adjust this value as needed 
   }*/
+
+  .search-button {
+    background: var(--dark-grey);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 3px 5px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  
+  .search-button:hover {
+    background: black;
+    opacity: var(--hover-opacity);
+  }
+  
   
   
   
