@@ -12,11 +12,13 @@ const NodeDisplay: FC<NodeProps> = ({ nodeData }) => {
   const [visibleNode, setVisibleNode] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [clickedNodeId, setClickedNodeId] = useState(null);
+  const [isPanelOpen, setIsPanelOpen] = useState(false); 
 
   useEffect(() => {
     // Subscribe to the 'nodeClicked' event
     const handleNodeClick = (nodeId: any) => {
       console.log('Received node ID:', nodeId); // Log the node ID
+      setIsPanelOpen(true); 
       setClickedNodeId(nodeId);
     };
     
@@ -34,11 +36,13 @@ const NodeDisplay: FC<NodeProps> = ({ nodeData }) => {
   }, [searchTerm]);
 
   const handleClick = (nodeId: any) => {
+    console.log('we are in the nodeid');
     if (visibleNode === nodeId) {
       setVisibleNode(null);
     } else {
       setVisibleNode(nodeId);
     }
+    //console.log('isPanelOpen:', isPanelOpen); // log the value of isPanelOpen
   };
 
   const resetSearch = () => {
@@ -46,8 +50,13 @@ const NodeDisplay: FC<NodeProps> = ({ nodeData }) => {
     setClickedNodeId(null);
   };
 
+  useEffect(() => {
+    console.log('isPanelOpen changed:', isPanelOpen);
+  }, [isPanelOpen]);
+  
+
   return (
-    <Panel
+    <Panel isDeployed={isPanelOpen} setIsDeployed={setIsPanelOpen}
       title={
         <>
           <BsFillExclamationTriangleFill className="text-muted" /> Node Index
@@ -64,7 +73,7 @@ const NodeDisplay: FC<NodeProps> = ({ nodeData }) => {
         onChange={(e) => setSearchTerm(e.target.value)} 
       />
       <button className="search-button" onClick={resetSearch}>Search</button>
-      {nodeData && nodeData.data.sort((a: any, b: any) => a.name - b.name).filter((node: any) => {
+      {isPanelOpen && nodeData && nodeData.data.sort((a: any, b: any) => a.name - b.name).filter((node: any) => {
   // If a node has been clicked, filter based on nodeId
   if (clickedNodeId) {
     return node.name === clickedNodeId;

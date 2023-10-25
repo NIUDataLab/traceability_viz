@@ -7,12 +7,12 @@ import AnimateHeight from "react-animate-height";
 
 const DURATION = 300;
 
-const Panel: FC<{ title: JSX.Element | string; initiallyDeployed?: boolean; children?: ReactNode; }> = ({
+const Panel: FC<{ title: JSX.Element | string; isDeployed: boolean; setIsDeployed: (isDeployed: boolean) => void; children?: ReactNode; }> = ({
   title,
-  initiallyDeployed,
+  isDeployed,
+  setIsDeployed,
   children,
 }) => {
-  const [isDeployed, setIsDeployed] = useState(initiallyDeployed || false);
   const dom = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ const Panel: FC<{ title: JSX.Element | string; initiallyDeployed?: boolean; chil
     <div className="panel panels" ref={dom}>
       <h2>
         {title}{" "}
-        <button type="button" onClick={() => setIsDeployed((v) => !v)}>
+        <button type="button" onClick={() => setIsDeployed(!isDeployed)}>
           {isDeployed ? <MdExpandLess /> : <MdExpandMore />}
         </button>
       </h2>
