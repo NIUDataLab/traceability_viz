@@ -1,12 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import type { FC } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 
 import Panel from "./Panel";
 
 const NearestNeighborTravDescriptionPanel: FC = () => {
+  const [isPanelOpen, setIsPanelOpen] = useState(true); // Panel is initially open
   return (
     <Panel
+      isDeployed={isPanelOpen}
+      setIsDeployed={setIsPanelOpen}
       title={
         <>
           <BsInfoCircle className="text-muted" /> Description

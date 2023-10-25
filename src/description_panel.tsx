@@ -1,13 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import type { FC } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 
 import Panel from "./Panel";
 
 const DescriptionPanel: FC = () => {
+  const [isPanelOpen, setIsPanelOpen] = useState(true); // Panel is initially open
   return (
     <Panel
-      initiallyDeployed //this option if included, opens the panel automatically. If not the panel will open closed.
+      isDeployed={isPanelOpen}
+      setIsDeployed={setIsPanelOpen}
       title={
         <>
           <BsInfoCircle className="text-muted" /> Description
