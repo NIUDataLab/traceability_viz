@@ -4,6 +4,7 @@ import SingleNodeDescriptionPanel from './single_node_description_panel';
 import DescriptionPanel from './description_panel';
 import NearestNeighborTravDescriptionPanel from './nearest_neighbor_traversal_description';
 import NodeDisplay from './node_display';
+import RiskTraversalDescriptionPanel from './risk_visual_description'
 import './styles.css'
 
 function App() {
@@ -56,6 +57,7 @@ function App() {
       {mode === 'single-node' && <SingleNodeDescriptionPanel />}
       {mode === 'single-node' && <NodeDisplay nodeData={nodeDescriptionsData} />}
       {mode === 'start-node-distance' && <NearestNeighborTravDescriptionPanel />}
+      {mode === 'better-traversal-visual' && <RiskTraversalDescriptionPanel />}
       {/* Add similar lines for the other modes... */}
     </div>
   );

@@ -7,9 +7,11 @@
     <title>Sigma Graph</title>
   </head>
   <style>
-    #single-node-container, #start-node-distance-container {
-      width: 1500px;
-      height: 800px;
+    #single-node-container, #start-node-distance-container, #better-traversal-container {
+      /* width: 1500px; */
+      /* height: 800px; */
+      width: 71%; /* Full width */
+      height: 80vh; /* Full height */
       margin: 0;
       padding: 0;
       overflow: hidden;
@@ -88,6 +90,7 @@
         Enter a distance:
       </label>
       <input type="text" id="better-distance-input"/>
+      <div id="better-traversal-container"></div>
     </div>
 
     <div id="root"></div>
@@ -133,8 +136,6 @@
     <div id="path-display"></div>
     <div id="total-risk-display"></div>
     </div>
-
-
 
       <!-- Add this to your HTML file -->
       <div id="input_node_error-message" style="color: red; display: none"></div>
