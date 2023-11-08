@@ -187,8 +187,10 @@ def nearest_neighbor_traversal_no_cycles(graph, start_node, max_distance):
 
     return path, edge_weights, distance
 
+# For now, this route is useless. we do not need it for what we are trying to do.
 @app.route('/newcalc', methods=['POST'])
 def new_calc():
+    global last_data
     data = request.get_json()
     start_node = data['start_node']
     max_distance = data['start_distance']
@@ -196,7 +198,7 @@ def new_calc():
     print(start_node, " ", max_distance)
 
     # Load data from the JSON file
-    graph_data = json.loads(get_data())
+    graph_data = json.loads(last_data)
 
     # Find the minimum and maximum edge weight
     min_weight = min(min(neighbors.values()) for neighbors in graph_data.values())

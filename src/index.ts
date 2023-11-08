@@ -565,14 +565,301 @@ if (start_node_input && distance_input) {
 const better_traversal_input = document.getElementById("better-traversal-input") as HTMLInputElement;
 const better_distance_input = document.getElementById("better-distance-input") as HTMLInputElement;
 
+const better_distance_graph = new Graph();
+let better_distance_renderer: Sigma | null;
+const better_distance_container = document.getElementById("better-traversal-container") as HTMLElement;
+
+//Event listener to check to see the option selected. 
+document.getElementById('data-select')?.addEventListener('change', (event) => {
+  const selectedOption = (event.target as HTMLSelectElement).value; // saving the value of the selected option
+
+  fetch('http://127.0.0.1:5000/different.json', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: `data_type=${selectedOption}`,
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);
+    // 'data' is now a JavaScript object that you can work with
+    parsed_data = data;
+
+    // Reading and adding the nodes into the single_node_graph_view
+    for (const node of Object.keys(parsed_data)) {
+      //console.log("node:", node)
+      better_distance_graph.addNode(node, { label: node } );
+    }
+  });
+});
+
+// This is the best traversal that shows meaningful nodes for now.
+let relationships: { [key: string]: any };
+let selectedNode: string | undefined = undefined;
+let better_distance: string | null = null;
+
 if (better_traversal_input && better_distance_input) {
   better_distance_input.addEventListener("keydown", async (event) => { //make the event listener async
     if (event.key === "Enter") {
-      await better_fetchData();// wait for fetchData to complete
+
+      const nodeLabel = better_traversal_input.value; //change this still
+      better_distance = better_distance_input.value;
+  
+      // Find a node with a matching label
+      selectedNode = better_distance_graph
+        .nodes()
+        .find(
+          (node) =>
+            better_distance_graph.getNodeAttribute(node, "label") === nodeLabel
+        );
+      if (selectedNode) {
+        console.log("we found the node");
+
+        // Call the resetGraph function to reset the graph
+        resetGraph(better_distance_graph);
+
+        const containerWidth = better_distance_container.offsetWidth;
+        const containerHeight = better_distance_container.offsetHeight;
+
+        better_distance_graph.setNodeAttribute(selectedNode, "x", -containerWidth / 2);
+        better_distance_graph.setNodeAttribute(selectedNode, "y", -containerHeight / 2);
+
+        // Set its size and color
+        better_distance_graph.setNodeAttribute(selectedNode, "size", 10);
+        better_distance_graph.setNodeAttribute(selectedNode, "color", "black");
+         // Call the updateColor function to start the rainbow fading effect
+        //updateColor(graph_distance_view, selectedNode);
+
+        // Get the relationship data for the selected node
+        relationships = parsed_data[selectedNode];
+
+        // Calculate the minimum and maximum relationship values
+        const minRelationship = Math.min(...(Object.values(relationships) as number[]));
+        const maxRelationship = Math.max(...(Object.values(relationships) as number[]));
+
+        //const colorScale = chroma.scale("YlOrRd").domain([minRelationship, maxRelationship]);
+
+        // Normalize the relationship values and use them to position the nodes
+        let angle = -Math.PI / 2;
+        const angleStep = Math.PI / (2 * Object.keys(relationships).length);
+        for (const [node, relationship] of Object.entries(relationships)) {
+          if (node !== selectedNode) {
+          // Normalize the relationship value
+          const normalizedRelationship =
+            ((relationship as number) - minRelationship) /
+            (maxRelationship - minRelationship);
+
+          // Calculate the distance of the node from the selected node
+          //const distance = (1 - normalizedRelationship) * (containerWidth / 4);
+          const distance = Math.pow(1 - normalizedRelationship, 3) * (containerWidth / 4);
+
+          // Set the position of the node
+          better_distance_graph.setNodeAttribute(
+            node,
+            "x",
+            -containerWidth / 2 + distance * Math.cos(angle)
+          );
+          better_distance_graph.setNodeAttribute(
+            node,
+            "y",
+            -containerHeight / 2 + distance * Math.sin(angle)
+          );
+
+          const relationshipDistance = relationships[node];
+
+          // Set the color of the node based on its weight
+          /*better_distance_graph.setNodeAttribute(
+          node,
+          "color",
+          colorScale(normalizedRelationship).hex()
+          );*/
+
+          // Increment the angle for the next node
+          angle += angleStep;
+        }
+      }
+
+   // Calculate the distance of the node from the selected node
+  //const distance = Math.pow(1 - normalizedRelationship, 2) * (containerWidth / 4);
+  updateColors();
+  console.log("Data set used: ", dataSelect.value);
+
+      // Check if the third container element was found
+      if (!better_distance_container) {
+        console.error(
+        "Error: Could not find second container element on the page"
+      );
+      } else {
+        console.log("good");
+        // Check if a second Sigma instance already exists
+        if (better_distance_renderer) {
+          console.log("perfect!!!!");
+          // Remove the existing Sigma instance
+          better_distance_renderer.kill();
+          better_distance_renderer = null;
+      }
+
+      // Create a new Sigma instance and render the graph in the third container
+      better_distance_renderer = new Sigma(better_distance_graph, better_distance_container);
     }
+    }
+  }
   });
 }
 
+function updateColors() {
+  let redNodes = [];
+  let greenNodes = [];
+  if (relationships && selectedNode && better_distance !== null) {
+    for (const [node, relationship] of Object.entries(relationships)) {
+      if (node !== selectedNode) {
+        const relationshipDistance = relationships[node];
+        if (relationshipDistance <= better_distance) {
+          better_distance_graph.setNodeAttribute(node, "color", "green");
+          greenNodes.push({ node: node, distance: relationshipDistance });
+        } else {
+          better_distance_graph.setNodeAttribute(node, "color", "red");
+          if (better_distance_graph.getNodeAttribute(node, "color") === "red") {
+            redNodes.push({ node: node, distance: relationshipDistance });
+          }
+        }
+      }
+    }
+    // Sort the redNodes and greenNodes array in ascending order of distance
+    redNodes.sort((a, b) => b.distance - a.distance);
+    greenNodes.sort((a, b) => b.distance - a.distance);
+    
+    // Add edges between the red nodes and green nodes in order of their distance
+    for (let i = 0; i < redNodes.length - 1; i++) {
+      if (!better_distance_graph.hasEdge(redNodes[i].node, redNodes[i + 1].node)) {
+        let edgeId = better_distance_graph.addEdge(redNodes[i].node, redNodes[i + 1].node);
+        //better_distance_graph.setEdgeAttribute(edgeId, 'color', 'red');
+      }
+    }
+    for (let i = 0; i < greenNodes.length - 1; i++) {
+      if (!better_distance_graph.hasEdge(greenNodes[i].node, greenNodes[i + 1].node)) {
+        let edgeId = better_distance_graph.addEdge(greenNodes[i].node, greenNodes[i + 1].node);
+        //better_distance_graph.setEdgeAttribute(edgeId, 'color', 'green');
+      }
+    }
+    
+    // Connect selectedNode to the first node in redNodes
+    if (redNodes.length > 0 && !better_distance_graph.hasEdge(selectedNode, redNodes[0].node)) {
+      better_distance_graph.addEdge(selectedNode, redNodes[0].node);
+    }
+    // Connect last red node to the first green node
+    if (redNodes.length > 0 && greenNodes.length > 0 && !better_distance_graph.hasEdge(redNodes[redNodes.length - 1].node, greenNodes[0].node)) {
+      better_distance_graph.addEdge(redNodes[redNodes.length - 1].node, greenNodes[0].node);
+    }
+  }
+  
+  console.log("done with this iteration!!!!!");
+}
+
+
+
+// This does not work properly, supposed to be a tree, probably gonna have to throw it away.
+/*let relationships: { [key: string]: any };
+let selectedNode: string | undefined = undefined;
+let better_distance: string | null = null;
+
+if (better_traversal_input && better_distance_input) {
+  better_distance_input.addEventListener("keydown", async (event) => { //make the event listener async
+    if (event.key === "Enter") {
+
+      const nodeLabel = better_traversal_input.value; //change this still
+      better_distance = better_distance_input.value;
+  
+      // Find a node with a matching label
+      selectedNode = better_distance_graph
+        .nodes()
+        .find(
+          (node) =>
+            better_distance_graph.getNodeAttribute(node, "label") === nodeLabel
+        );
+      if (selectedNode) {
+        console.log("we found the node");
+
+        // Call the resetGraph function to reset the graph
+        resetGraph(better_distance_graph);
+
+        const containerWidth = better_distance_container.offsetWidth;
+        const containerHeight = better_distance_container.offsetHeight;
+
+        // Set the position of the selected node to the middle left of the graph
+        better_distance_graph.setNodeAttribute(selectedNode, "x", -containerWidth / 2);
+        better_distance_graph.setNodeAttribute(selectedNode, "y", 0);
+
+        // Set its size and color
+        better_distance_graph.setNodeAttribute(selectedNode, "size", 10);
+        better_distance_graph.setNodeAttribute(selectedNode, "color", "black");
+         // Call the updateColor function to start the rainbow fading effect
+        //updateColor(graph_distance_view, selectedNode);
+
+        // Get the relationship data for the selected node
+        relationships = parsed_data[selectedNode];
+
+        // Calculate the minimum and maximum relationship values
+        const minRelationship = Math.min(...(Object.values(relationships) as number[]));
+        const maxRelationship = Math.max(...(Object.values(relationships) as number[]));
+
+        //const colorScale = chroma.scale("YlOrRd").domain([minRelationship, maxRelationship]);
+        let level = 0;
+        let position = 0;
+        let maxLevelSize = 1;
+        
+        // Sort the nodes (excluding the root) to ensure consistent ordering
+        const sortedNodes = better_distance_graph.nodes().filter(node => node !== selectedNode).sort();
+        
+        for (const node of sortedNodes) {
+          // Set the position of the node
+          const x = level * containerWidth / (sortedNodes.length - 1);
+          const y = -containerHeight / 2 + ((containerHeight + 500) / maxLevelSize) * (position * 2); // Adjusted for more space between nodes
+          better_distance_graph.setNodeAttribute(node, "x", x);
+          better_distance_graph.setNodeAttribute(node, "y", y);
+        
+          // Increment position and check if we need to go to the next level
+          position++;
+          if (position >= maxLevelSize) {
+            position = 0;
+            level++;
+            maxLevelSize *= 2; // Each level of a binary tree is twice as large as the previous one
+          }
+        }
+        
+        
+
+
+   // Calculate the distance of the node from the selected node
+  //const distance = Math.pow(1 - normalizedRelationship, 2) * (containerWidth / 4);
+  console.log("Data set used: ", dataSelect.value);
+
+      // Check if the third container element was found
+      if (!better_distance_container) {
+        console.error(
+        "Error: Could not find second container element on the page"
+      );
+      } else {
+        console.log("good");
+        // Check if a second Sigma instance already exists
+        if (better_distance_renderer) {
+          console.log("perfect!!!!");
+          // Remove the existing Sigma instance
+          better_distance_renderer.kill();
+          better_distance_renderer = null;
+      }
+
+      // Create a new Sigma instance and render the graph in the third container
+      better_distance_renderer = new Sigma(better_distance_graph, better_distance_container);
+    }
+    }
+  }
+  });
+}
+
+
+// this is not necessary right now.
 async function better_fetchData() {
   const start_node = better_traversal_input.value;
   const start_distance = Number(better_distance_input.value);
@@ -596,7 +883,7 @@ async function better_fetchData() {
   //console.log("total_risk:", total_risk)
 
   console.log("data")
-}
+}*/
 
 
 
