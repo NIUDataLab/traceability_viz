@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sigma Graph</title>
+  </head>
+  <style>
+    #single-node-container, #start-node-distance-container, #better-traversal-container {
+      /* width: 1500px; */
+      /* height: 800px; */
+      width: 71%; /* Full width */
+      height: 80vh; /* Full height */
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      border: 2px solid black;
+      box-sizing: border-box;
+      margin-left: 5px;
+    }
+
+    #start-node-distance-container {
+      height: 80vh; /* Adjust this value as needed */
+    }
+
+    #path-display, #total-risk-display {
+      position: absolute;
+      right: 0;
+    }
+
+    #path-display {
+      top: 20px; /* Adjust this value to align with your header */
+    }
+
+    #total-risk-display {
+      top: 40px; /* Adjust this value to prevent overlap with #path */
+    }
+
+    #legend {
+      border: 1px solid black; /* This gives the legend a box outline */
+      position: absolute; /* This allows you to position the legend anywhere within its parent container */
+      right: 0; /* This moves the legend to the right edge of its parent container */
+      bottom: 0; /* This moves the legend to the bottom edge of its parent container */
+      padding: 10px; /* This adds some space around the content inside the legend */
+      background-color: lightblue;
+    }
+
+    .color-box {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      margin-right: 10px;
+    }
+
+    #info-box {
+      border: 1px solid black;
+      position: absolute;
+      right: 0;
+      top: 0; /* This moves the info box to the top edge of its parent container */
+      padding: 10px;
+      background-color: lightcoral; /* Light red color */
+    }
+  </style>
+  <body>
+      <div id="options-selection"></div>
+      <h1>CWE Weighted Graph</h1>
+      <label for="mode-select">Choose a mode:</label>
+      <select id="mode-select">
+        <option value="">Select a mode...</option>
+        <option value="single-node">Single node</option>
+        <option value="start-end-nodes">Start and end nodes</option>
+        <option value="start-node-distance">Start node and distance</option>
+        <option value="better-traversal-visual">Better Version</option>
+      </select>
+      <label for="data-select">Choose the data to work with:</label>
+      <select id="data-select">
+        <option value="">Select data...</option>
+        <option value="CWE">CWE</option>
+        <option value="CAPEC">CAPEC</option>
+      </select></div>
+
+      <div id="better-traversal-section" style="display: none;">
+      <label for="better-traversal-input">
+        Enter a start node:
+      </label>
+      <input type="text" id="better-traversal-input"/>
+    
+      <label for="better-distance-input">
+        Enter a distance:
+      </label>
+      <input type="text" id="better-distance-input"/>
+      <div id="better-traversal-container"></div>
+    </div>
+
+    <div id="root"></div>
+
+
+      <div id="single-node-section" style="display: none;">
+      <label for="single-node-input">
+        Enter a node to see other closely related nodes:
+      </label>
+      <input type="text" id="single-node-input"/>
+      <div id="single-node-container"></div>
+
+      <div id="info-box" style="display: none;">
+      </div>
+      
+      
+      <!-- Node Color Legend-->
+      <div id="legend" style="display: none;">
+        <h3>Node Relations</h3>
+        <ul>
+          <li><span class="color-box" style= "background-color: red;"></span>
+          High Degree of Relation</li>
+          <li><span class="color-box" style= "background-color: orange;"></span>
+          Moderate Degree of Relation</li>
+          <li><span class="color-box" style= "background-color: yellow;"></span>
+          Low Degree of Relation</li>
+        </ul>
+      </div>
+    </div>
+
+
+    <div id="start-node-distance-section" style="display: none;">
+    <label for="start-node-input">
+      Enter a start node:
+    </label>
+    <input type="text" id="start-node-input"/>
+
+    <label for="distance-input">
+      Enter a distance:
+    </label>
+    <input type="text" id="distance-input"/>
+    <div id="start-node-distance-container"></div>
+    <div id="path-display"></div>
+    <div id="total-risk-display"></div>
+    </div>
+
+      <!-- Add this to your HTML file -->
+      <div id="input_node_error-message" style="color: red; display: none"></div>
+      <!-- <div id="initial_container"></div>
+      <div id="temp"></div> -->
+      <script src="./dist/index.js" type="module"></script>
+  </body>
+</html>
