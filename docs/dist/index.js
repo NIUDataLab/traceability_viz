@@ -61,7 +61,7 @@ document.getElementById("data-select")?.addEventListener("change", (event) => {
     alert("Please choose a data set to work with!");
     return;
   }
-  fetch("http://127.0.0.1:5000/different.json", {
+  fetch("http://jwilson9567.pythonanywhere.com", {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded"
