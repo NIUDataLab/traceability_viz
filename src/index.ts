@@ -117,7 +117,9 @@ document.getElementById('data-select')?.addEventListener('change', (event) => {
   // Once the server has that, it send the data set we want back.
   // We then print the data to the console, to check.
   // Finally, we save the data into parsed_data.
-  fetch('http://127.0.0.1:5000/different.json', {
+  //http://127.0.0.1:5000/different.json -- for local hosting
+  //http://jwilson9567.pythonanywhere.com -- this is for online hosting
+  fetch('http://jwilson9567.pythonanywhere.com', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
