@@ -119,7 +119,7 @@ document.getElementById('data-select')?.addEventListener('change', (event) => {
   // Finally, we save the data into parsed_data.
   //http://127.0.0.1:5000/different.json -- for local hosting
   //http://jwilson9567.pythonanywhere.com -- this is for online hosting
-  fetch('https://jwilson9567.pythonanywhere.com/different.json', {
+  fetch('https://jwilson9567.pythonanywhere.com', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -450,7 +450,9 @@ async function fetchData() {
   const start_node = start_node_input.value;
   const start_distance = Number(distance_input.value);
 
-  const response = await fetch('http://127.0.0.1:5000/calc', {
+  //http://127.0.0.1:5000/calc -- for local hosting
+  //http://jwilson9567.pythonanywhere.com -- this is for online hosting
+  const response = await fetch('https://jwilson9567.pythonanywhere.com/calc', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -577,7 +579,9 @@ const better_distance_container = document.getElementById("better-traversal-cont
 document.getElementById('data-select')?.addEventListener('change', (event) => {
   const selectedOption = (event.target as HTMLSelectElement).value; // saving the value of the selected option
 
-  fetch('http://127.0.0.1:5000/different.json', {
+  //http://127.0.0.1:5000/different.json -- for local hosting
+  //http://jwilson9567.pythonanywhere.com -- this is for online hosting
+  fetch('http://jwilson9567.pythonanywhere.com/different.json', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',

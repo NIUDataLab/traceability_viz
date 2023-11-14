@@ -61,7 +61,7 @@ document.getElementById("data-select")?.addEventListener("change", (event) => {
     alert("Please choose a data set to work with!");
     return;
   }
-  fetch("https://jwilson9567.pythonanywhere.com/different.json", {
+  fetch("https://jwilson9567.pythonanywhere.com", {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded"
@@ -180,7 +180,7 @@ let total_risk;
 async function fetchData() {
   const start_node = start_node_input.value;
   const start_distance = Number(distance_input.value);
-  const response = await fetch("http://127.0.0.1:5000/calc", {
+  const response = await fetch("https://jwilson9567.pythonanywhere.com/calc", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -270,7 +270,7 @@ let better_distance_renderer;
 const better_distance_container = document.getElementById("better-traversal-container");
 document.getElementById("data-select")?.addEventListener("change", (event) => {
   const selectedOption = event.target.value;
-  fetch("http://127.0.0.1:5000/different.json", {
+  fetch("http://jwilson9567.pythonanywhere.com/different.json", {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded"
