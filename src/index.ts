@@ -119,7 +119,7 @@ document.getElementById('data-select')?.addEventListener('change', (event) => {
   // Finally, we save the data into parsed_data.
   //http://127.0.0.1:5000/different.json -- for local hosting
   //http://jwilson9567.pythonanywhere.com -- this is for online hosting
-  fetch('http://jwilson9567.pythonanywhere.com/different.json', {
+  fetch('https://jwilson9567.pythonanywhere.com/different.json', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -146,7 +146,7 @@ document.getElementById('data-select')?.addEventListener('change', (event) => {
   // We then print it to the console, and save it into node_descriptions_data.
   //http://127.0.0.1:5000/all_node_description_data.json -- for local hosting
   //http://jwilson9567.pythonanywhere.com -- this is for online hosting
-  fetch('http://jwilson9567.pythonanywhere.com/all_node_description_data.json', {
+  fetch('https://jwilson9567.pythonanywhere.com/all_node_description_data.json', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
