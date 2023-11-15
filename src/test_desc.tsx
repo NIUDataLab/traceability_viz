@@ -36,7 +36,9 @@ function App() {
       return;
     }
 
-    fetch('http://127.0.0.1:5000/all_node_description_data.json', {
+    //http://127.0.0.1:5000/all_node_description_data.json -- for local hosting
+    //http://jwilson9567.pythonanywhere.com -- this is for online hosting
+    fetch('https://jwilson9567.pythonanywhere.com/all_node_description_data.json', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
