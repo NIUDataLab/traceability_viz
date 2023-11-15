@@ -1,0 +1,8 @@
+To deploy a build, and actually use for a website, (does not have to be github pages), here is the process:
+first run npx snowpack build, this will build the final project to be displayed.
+You must make a docs folder, this is where github pages reads from.
+Once this is done, delete everything except the .nojekyll from the docs folder.
+Then copy and paste everything in the build folder into the docs folder. 
+Once this is done, push to github.
+Then go to settings, pages, and deploy the project. 
+It may take a couple of tries to refresh, but this is the general process to follow for hosting.

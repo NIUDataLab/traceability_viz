@@ -74,6 +74,17 @@ document.getElementById("data-select")?.addEventListener("change", (event) => {
       single_node_graph_view.addNode(node, {label: node});
     }
   });
+  fetch("https://jwilson9567.pythonanywhere.com/all_node_description_data.json", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: `data_type=${selectedOption}`
+  }).then((response) => response.json()).then((data) => {
+    console.log("Printing descriptions for all nodes: ");
+    console.log(data);
+    node_descriptions_data = data;
+  });
 });
 const single_node_graph_view = new Graph();
 const modeSelect = document.querySelector("#mode-select");
@@ -259,6 +270,19 @@ let better_distance_renderer;
 const better_distance_container = document.getElementById("better-traversal-container");
 document.getElementById("data-select")?.addEventListener("change", (event) => {
   const selectedOption = event.target.value;
+  fetch("https://jwilson9567.pythonanywhere.com/different.json", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: `data_type=${selectedOption}`
+  }).then((response) => response.json()).then((data) => {
+    console.log(data);
+    parsed_data = data;
+    for (const node of Object.keys(parsed_data)) {
+      better_distance_graph.addNode(node, {label: node});
+    }
+  });
 });
 let relationships;
 let selectedNode = void 0;
