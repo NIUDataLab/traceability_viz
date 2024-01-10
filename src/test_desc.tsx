@@ -11,6 +11,7 @@ function App() {
   const [mode, setMode] = useState('');
   const [selectedOption, setSelectedOption] = useState('');
   const [nodeDescriptionsData, setNodeDescriptionsData] = useState<{ data: any } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // First useEffect hook for adding the event listeners
   useEffect(() => {
@@ -32,9 +33,11 @@ function App() {
 
   // Second useEffect hook for fetching the data
   useEffect(() => {
-    if (!selectedOption) {
+    if (!selectedOption || (mode !== 'single-node' && mode !== 'better-traversal-visual')) {
       return;
     }
+
+    setIsLoading(true); // Set loading state to true when starting to fetch data
 
     //http://127.0.0.1:5000/all_node_description_data.json -- for local hosting
     //http://jwilson9567.pythonanywhere.com -- this is for online hosting
@@ -50,18 +53,25 @@ function App() {
       console.log("Printing descriptions for all nodes for node_display element: ")
       console.log(data);
       setNodeDescriptionsData(data); // Store the data in state
+      setIsLoading(false); // Set loading state to false when data has been fetched
     });
-  }, [selectedOption]); // selectedOption as a dependency
+  }, [selectedOption, mode]); // selectedOption as a dependency
 
   return (
     <div className="panel-container">
-      {mode === '' && <DescriptionPanel />}
-      {mode === 'single-node' && <SingleNodeDescriptionPanel />}
-      {mode === 'single-node' && <NodeDisplay nodeData={nodeDescriptionsData} selectedOption={selectedOption} />}
-      {mode === 'start-node-distance' && <NearestNeighborTravDescriptionPanel />}
-      {mode === 'better-traversal-visual' && <RiskTraversalDescriptionPanel />}
-      {mode === 'better-traversal-visual' && <NodeDisplay nodeData={nodeDescriptionsData} selectedOption={selectedOption} />}
-      {/* Add similar lines for the other modes... */}
+      {isLoading ? (
+        <div>Loading...</div> // Display loading indicator when isLoading is true
+      ) : (
+        <>
+          {mode === '' && <DescriptionPanel />}
+          {mode === 'single-node' && <SingleNodeDescriptionPanel />}
+          {mode === 'single-node' && <NodeDisplay nodeData={nodeDescriptionsData} selectedOption={selectedOption} />}
+          {mode === 'start-node-distance' && <NearestNeighborTravDescriptionPanel />}
+          {mode === 'better-traversal-visual' && <RiskTraversalDescriptionPanel />}
+          {mode === 'better-traversal-visual' && <NodeDisplay nodeData={nodeDescriptionsData} selectedOption={selectedOption} />}
+          {/* Add similar lines for the other modes... */}
+        </>
+      )}
     </div>
   );
 }
