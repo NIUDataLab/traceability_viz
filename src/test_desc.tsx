@@ -57,10 +57,10 @@ function App() {
     <div className="panel-container">
       {mode === '' && <DescriptionPanel />}
       {mode === 'single-node' && <SingleNodeDescriptionPanel />}
-      {mode === 'single-node' && <NodeDisplay nodeData={nodeDescriptionsData} />}
+      {mode === 'single-node' && <NodeDisplay nodeData={nodeDescriptionsData} selectedOption={selectedOption} />}
       {mode === 'start-node-distance' && <NearestNeighborTravDescriptionPanel />}
       {mode === 'better-traversal-visual' && <RiskTraversalDescriptionPanel />}
-      {mode === 'better-traversal-visual' && <NodeDisplay nodeData={nodeDescriptionsData} />}
+      {mode === 'better-traversal-visual' && <NodeDisplay nodeData={nodeDescriptionsData} selectedOption={selectedOption} />}
       {/* Add similar lines for the other modes... */}
     </div>
   );
