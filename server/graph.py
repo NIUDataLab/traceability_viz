@@ -34,7 +34,7 @@ def get_description_single():
     try:
         node_id = request.form.get('node_id')
         print("node_id:", node_id)
-        with open("inputfile[CachedWeakness].json", "r", encoding='utf-8') as f:
+        with open("inputfileCWE.json", "r", encoding='utf-8') as f:
             data_str = f.read()
             data = json.loads(data_str)
             # Find the data for this node
@@ -55,10 +55,10 @@ def get_all_descriptions_data():
     data_type = request.form.get('data_type')
     if data_type == 'CWE':
         # encoding 'utf-8' is needed here, otherwise you will get errors. 
-        with open("inputfile[CachedWeakness].json", "r", encoding='utf-8') as f:
+        with open("inputfileCWE.json", "r", encoding='utf-8') as f:
             last_data = f.read()
     elif data_type == 'CAPEC':
-        with open("inputfile[CachedWeakness].json", "r", encoding='utf-8') as f:
+        with open("inputfileCWE.json", "r", encoding='utf-8') as f:
             last_data = f.read()
     else:
         return jsonify({'error': 'Invalid data type'}), 400
@@ -129,6 +129,16 @@ def calc():
 
     # Load data from the JSON file
     graph_data = json.loads(last_data)
+
+    print(type(graph_data)) # should print <class 'dict'>
+    print(type(graph_data.values())) # should print <class 'dict_values'>
+    print(graph_data.values()) # prints the values of the graph_data dictionary
+
+    # Find the minimum and maximum edge weight
+    for neighbors in graph_data.values():
+        print(type(neighbors)) # prints the type of neighbors
+        print(neighbors) # prints the neighbors dictionary
+
 
     # Find the minimum and maximum edge weight
     min_weight = min(min(neighbors.values()) for neighbors in graph_data.values())

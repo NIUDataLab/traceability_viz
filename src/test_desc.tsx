@@ -60,6 +60,7 @@ function App() {
       {mode === 'single-node' && <NodeDisplay nodeData={nodeDescriptionsData} />}
       {mode === 'start-node-distance' && <NearestNeighborTravDescriptionPanel />}
       {mode === 'better-traversal-visual' && <RiskTraversalDescriptionPanel />}
+      {mode === 'better-traversal-visual' && <NodeDisplay nodeData={nodeDescriptionsData} />}
       {/* Add similar lines for the other modes... */}
     </div>
   );

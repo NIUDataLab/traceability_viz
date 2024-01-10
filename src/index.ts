@@ -225,7 +225,6 @@ if (modeSelect) {
     single_node_section.style.display = "none";
     start_node_distance_section.style.display = "none";
     better_traversal.style.display = "none";
-    
 
     if (mode === "single-node")
     {
@@ -451,7 +450,7 @@ async function fetchData() {
   const start_distance = Number(distance_input.value);
 
   //http://127.0.0.1:5000/calc -- for local hosting
-  //http://jwilson9567.pythonanywhere.com -- this is for online hosting
+  //http://jwilson9567.pythonanywhere.com/calc -- this is for online hosting
   const response = await fetch('https://jwilson9567.pythonanywhere.com/calc', {
     method: 'POST',
     headers: {
@@ -579,8 +578,24 @@ const better_distance_container = document.getElementById("better-traversal-cont
 document.getElementById('data-select')?.addEventListener('change', (event) => {
   const selectedOption = (event.target as HTMLSelectElement).value; // saving the value of the selected option
 
+  // Reset the input fields
+  better_traversal_input.value = '';
+  better_distance_input.value = '';
+
+  // Clear the graph
+  better_distance_graph.clear();
+
+  // Kill the renderer if it exists
+  if (better_distance_renderer != null)
+  {
+    better_distance_renderer.kill();
+    better_distance_renderer = null;
+  }
+
   //http://127.0.0.1:5000/different.json -- for local hosting
   //http://jwilson9567.pythonanywhere.com -- this is for online hosting
+  //this needs to be fixed to work with both CAPEC and CWE datasets still
+  //TODO the previous graph is not being killed properly
   fetch('https://jwilson9567.pythonanywhere.com/different.json', {
     method: 'POST',
     headers: {
