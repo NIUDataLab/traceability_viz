@@ -270,6 +270,13 @@ let better_distance_renderer;
 const better_distance_container = document.getElementById("better-traversal-container");
 document.getElementById("data-select")?.addEventListener("change", (event) => {
   const selectedOption = event.target.value;
+  better_traversal_input.value = "";
+  better_distance_input.value = "";
+  better_distance_graph.clear();
+  if (better_distance_renderer != null) {
+    better_distance_renderer.kill();
+    better_distance_renderer = null;
+  }
   fetch("https://jwilson9567.pythonanywhere.com/different.json", {
     method: "POST",
     headers: {

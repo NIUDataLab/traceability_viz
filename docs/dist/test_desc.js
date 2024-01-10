@@ -10,6 +10,7 @@ function App() {
   const [mode, setMode] = useState("");
   const [selectedOption, setSelectedOption] = useState("");
   const [nodeDescriptionsData, setNodeDescriptionsData] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
     const modeSelect = document.getElementById("mode-select");
     const dataSelect = document.getElementById("data-select");
@@ -25,9 +26,10 @@ function App() {
     }
   }, []);
   useEffect(() => {
-    if (!selectedOption) {
+    if (!selectedOption || mode !== "single-node" && mode !== "better-traversal-visual") {
       return;
     }
+    setIsLoading(true);
     fetch("https://jwilson9567.pythonanywhere.com/all_node_description_data.json", {
       method: "POST",
       headers: {
@@ -38,12 +40,17 @@ function App() {
       console.log("Printing descriptions for all nodes for node_display element: ");
       console.log(data);
       setNodeDescriptionsData(data);
+      setIsLoading(false);
     });
-  }, [selectedOption]);
+  }, [selectedOption, mode]);
   return /* @__PURE__ */ React.createElement("div", {
     className: "panel-container"
-  }, mode === "" && /* @__PURE__ */ React.createElement(DescriptionPanel, null), mode === "single-node" && /* @__PURE__ */ React.createElement(SingleNodeDescriptionPanel, null), mode === "single-node" && /* @__PURE__ */ React.createElement(NodeDisplay, {
-    nodeData: nodeDescriptionsData
-  }), mode === "start-node-distance" && /* @__PURE__ */ React.createElement(NearestNeighborTravDescriptionPanel, null), mode === "better-traversal-visual" && /* @__PURE__ */ React.createElement(RiskTraversalDescriptionPanel, null));
+  }, isLoading ? /* @__PURE__ */ React.createElement("div", null, "Loading...") : /* @__PURE__ */ React.createElement(React.Fragment, null, mode === "" && /* @__PURE__ */ React.createElement(DescriptionPanel, null), mode === "single-node" && /* @__PURE__ */ React.createElement(SingleNodeDescriptionPanel, null), mode === "single-node" && /* @__PURE__ */ React.createElement(NodeDisplay, {
+    nodeData: nodeDescriptionsData,
+    selectedOption
+  }), mode === "start-node-distance" && /* @__PURE__ */ React.createElement(NearestNeighborTravDescriptionPanel, null), mode === "better-traversal-visual" && /* @__PURE__ */ React.createElement(RiskTraversalDescriptionPanel, null), mode === "better-traversal-visual" && /* @__PURE__ */ React.createElement(NodeDisplay, {
+    nodeData: nodeDescriptionsData,
+    selectedOption
+  })));
 }
 ReactDOM.render(/* @__PURE__ */ React.createElement(React.StrictMode, null, /* @__PURE__ */ React.createElement(App, null)), document.getElementById("root"));

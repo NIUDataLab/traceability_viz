@@ -2,7 +2,7 @@ import React, {useState, useEffect} from "../_snowpack/pkg/react.js";
 import {BsFillExclamationTriangleFill} from "../_snowpack/pkg/react-icons/bs.js";
 import Panel from "./Panel.js";
 import {eventEmitter} from "./index.js";
-const NodeDisplay = ({nodeData}) => {
+const NodeDisplay = ({nodeData, selectedOption}) => {
   const [visibleNode, setVisibleNode] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [clickedNodeId, setClickedNodeId] = useState(null);
@@ -56,14 +56,14 @@ const NodeDisplay = ({nodeData}) => {
     }
     return node.name.includes(searchTerm) || node.value.name.includes(searchTerm);
   }).map((node) => {
-    const nodeLink = `https://cwe.mitre.org/data/definitions/${node.name}.html`;
+    const nodeLink = selectedOption === "CWE" ? `https://cwe.mitre.org/data/definitions/${node.name}.html` : `https://capec.mitre.org/data/definitions/${node.name}.html`;
     return /* @__PURE__ */ React.createElement("div", {
       className: `node-container ${visibleNode === node.name ? "clicked" : ""}`,
       key: node.name
     }, /* @__PURE__ */ React.createElement("h3", {
       className: "node-id",
       onClick: () => handleClick(node.name)
-    }, "CWE-", node.name, ": ", node.value.name), visibleNode === node.name && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("p", null, "Name: ", node.value.name), /* @__PURE__ */ React.createElement("p", null, "Description: ", JSON.stringify(node.value.description)), /* @__PURE__ */ React.createElement("p", null, "Link: ", /* @__PURE__ */ React.createElement("a", {
+    }, selectedOption, "-", node.name, ": ", node.value.name), visibleNode === node.name && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("p", null, "Name: ", node.value.name), /* @__PURE__ */ React.createElement("p", null, "Description: ", JSON.stringify(node.value.description)), /* @__PURE__ */ React.createElement("p", null, "Link: ", /* @__PURE__ */ React.createElement("a", {
       className: "node-link",
       href: nodeLink,
       target: "_blank",
