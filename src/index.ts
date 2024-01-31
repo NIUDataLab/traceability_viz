@@ -450,7 +450,7 @@ async function fetchData() {
   const start_distance = Number(distance_input.value);
 
   //http://127.0.0.1:5000/calc -- for local hosting
-  //http://jwilson9567.pythonanywhere.com/calc -- this is for online hosting
+  //https://jwilson9567.pythonanywhere.com/calc -- this is for online hosting
   const response = await fetch('https://jwilson9567.pythonanywhere.com/calc', {
     method: 'POST',
     headers: {

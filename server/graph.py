@@ -209,6 +209,7 @@ def new_calc():
 
     # Load data from the JSON file
     graph_data = json.loads(last_data)
+    print('last_data ', last_data)
 
     # Find the minimum and maximum edge weight
     min_weight = min(min(neighbors.values()) for neighbors in graph_data.values())

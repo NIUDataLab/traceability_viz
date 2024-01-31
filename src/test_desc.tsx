@@ -33,7 +33,7 @@ function App() {
 
   // Second useEffect hook for fetching the data
   useEffect(() => {
-    if (!selectedOption || (mode !== 'single-node' && mode !== 'better-traversal-visual')) {
+    if (!selectedOption || (mode !== 'single-node' && mode !== 'better-traversal-visual' && mode !== 'start-node-distance')) {
       return;
     }
 
@@ -67,6 +67,7 @@ function App() {
           {mode === 'single-node' && <SingleNodeDescriptionPanel />}
           {mode === 'single-node' && <NodeDisplay nodeData={nodeDescriptionsData} selectedOption={selectedOption} />}
           {mode === 'start-node-distance' && <NearestNeighborTravDescriptionPanel />}
+          {mode === 'start-node-distance' && <NodeDisplay nodeData={nodeDescriptionsData} selectedOption={selectedOption} />}
           {mode === 'better-traversal-visual' && <RiskTraversalDescriptionPanel />}
           {mode === 'better-traversal-visual' && <NodeDisplay nodeData={nodeDescriptionsData} selectedOption={selectedOption} />}
           {/* Add similar lines for the other modes... */}
