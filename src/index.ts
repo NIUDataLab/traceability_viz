@@ -445,7 +445,7 @@ let path: string[];
 let edge_weights: string[];
 let total_risk: string[];
 
-async function fetchData() {
+/*async function fetchData() {
   const start_node = start_node_input.value;
   const start_distance = Number(distance_input.value);
 
@@ -468,6 +468,31 @@ async function fetchData() {
   console.log("path:", path);
   console.log("edge_weights:", edge_weights);
   console.log("total_risk:", total_risk)
+}*/
+
+function fetch_neighbor_traversal() {
+  const start_node = start_node_input.value;
+  const start_distance = Number(distance_input.value);
+
+  fetch('https://jwilson9567.pythonanywhere.com/calc', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ start_node, start_distance })
+  })
+  .then(response => response.json())
+  .then(data => {
+    path = data.path;
+    edge_weights = data.edge_weights;
+    total_risk = data.distance;
+
+    console.log("path:", path);
+    console.log("edge_weights:", edge_weights);
+    console.log("total_risk:", total_risk);
+  })
+  .catch(error => console.error('Error:', error));
+  console.log("wtf!!!!!")
 }
 
 const start_node_distance_graph = new Graph();
@@ -477,8 +502,9 @@ const start_node_distance_container = document.getElementById("start-node-distan
 if (start_node_input && distance_input) {
   distance_input.addEventListener("keydown", async (event) => { //make the event listener async
     if (event.key === "Enter") {
-      await fetchData();// wait for fetchData to complete
-      console.log("we read the data: ", path);
+      //await fetchData();// wait for fetchData to complete
+      await fetch_neighbor_traversal();
+      //console.log("we read the data: ", path);
       let graphWidth = 10; // Adjust this value to suit your needs
 
       // Clear the distance graph before adding nodes

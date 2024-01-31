@@ -33,7 +33,8 @@ function App() {
 
   // Second useEffect hook for fetching the data
   useEffect(() => {
-    if (!selectedOption || (mode !== 'single-node' && mode !== 'better-traversal-visual' && mode !== 'start-node-distance')) {
+    if (!selectedOption || (mode !== 'single-node' && mode !== 'better-traversal-visual')) {
+      // && mode !== 'start-node-distance'
       return;
     }
 
