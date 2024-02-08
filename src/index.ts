@@ -473,13 +473,17 @@ let total_risk: string[];
 function fetch_neighbor_traversal() {
   const start_node = start_node_input.value;
   const start_distance = Number(distance_input.value);
+  const dataSet = document.getElementById('data-select') as HTMLSelectElement;
+  const data_type = dataSet.value;
+  console.log(data_type);
 
-  fetch('https://jwilson9567.pythonanywhere.com/calc', {
+  // return the Promise Chain
+  return fetch('https://jwilson9567.pythonanywhere.com/calc', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ start_node, start_distance })
+    body: JSON.stringify({ start_node, start_distance, data_type })
   })
   .then(response => response.json())
   .then(data => {
@@ -504,7 +508,7 @@ if (start_node_input && distance_input) {
     if (event.key === "Enter") {
       //await fetchData();// wait for fetchData to complete
       await fetch_neighbor_traversal();
-      //console.log("we read the data: ", path);
+      console.log("we read the data: ", path);
       let graphWidth = 10; // Adjust this value to suit your needs
 
       // Clear the distance graph before adding nodes
@@ -587,6 +591,16 @@ if (start_node_input && distance_input) {
 
       // Create a new Sigma instance and render the graph in the third container
       start_node_distance_renderer = new Sigma(start_node_distance_graph, start_node_distance_container);
+
+      // Assuming single_node_renderer is initialized somewhere...
+      if (start_node_distance_renderer) {
+        (start_node_distance_renderer).on('clickNode', function(e: any) {
+          // Get the clicked node's id
+          var nodeId = e.node;
+          console.log("Clicked on node with ID:", nodeId);
+          eventEmitter.emit('nodeClicked', nodeId);
+        });
+      }
     }
       
     }

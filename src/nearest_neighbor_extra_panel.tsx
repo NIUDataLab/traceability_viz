@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 import type { FC } from "react";
-import { BsInfoCircle } from "react-icons/bs";
+import { AiFillAlert } from "react-icons/ai";
 
 import Panel from "./Panel";
 
-const NearestNeighborTravDescriptionPanel: FC = () => {
-  const [isPanelOpen, setIsPanelOpen] = useState(false); // Panel is initially open
+const NearestNeighborExtraPanel: FC = () => {
+  const [isPanelOpen, setIsPanelOpen] = useState(true); // Panel is initially open
   return (
     <Panel
       isDeployed={isPanelOpen}
       setIsDeployed={setIsPanelOpen}
       title={
         <>
-          <BsInfoCircle className="text-muted" /> Description
+          <AiFillAlert className="text-muted" /> Total Risk: 
         </>
       }
     >
@@ -35,4 +35,4 @@ const NearestNeighborTravDescriptionPanel: FC = () => {
   );
 };
 
-export default NearestNeighborTravDescriptionPanel;
+export default NearestNeighborExtraPanel;
