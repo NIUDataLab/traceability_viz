@@ -7,12 +7,17 @@ import NodeDisplay from './node_display';
 import RiskTraversalDescriptionPanel from './risk_visual_description'
 import NearestNeighborExtraPanel from './nearest_neighbor_extra_panel';
 import './styles.css'
+import type { Data } from './nearest_neighbor_extra_panel'; // replace with the actual file path
+ // replace with the actual file path
+
 
 function App() {
   const [mode, setMode] = useState('');
   const [selectedOption, setSelectedOption] = useState('');
   const [nodeDescriptionsData, setNodeDescriptionsData] = useState<{ data: any } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [nearestNeighborData, setNearestNeighborData] = useState<Data>({ path: [], edge_weights: [], total_risk: 0 });
+
 
   // First useEffect hook for adding the event listeners
   useEffect(() => {
@@ -68,7 +73,7 @@ function App() {
           {mode === 'single-node' && <SingleNodeDescriptionPanel />}
           {mode === 'single-node' && <NodeDisplay nodeData={nodeDescriptionsData} selectedOption={selectedOption} />}
           {mode === 'start-node-distance' && <NearestNeighborTravDescriptionPanel />}
-          {mode === 'start-node-distance' && <NearestNeighborExtraPanel />}
+          {mode === 'start-node-distance' && <NearestNeighborExtraPanel data={nearestNeighborData} />}
           {mode === 'start-node-distance' && <NodeDisplay nodeData={nodeDescriptionsData} selectedOption={selectedOption} />}
           {mode === 'better-traversal-visual' && <RiskTraversalDescriptionPanel />}
           {mode === 'better-traversal-visual' && <NodeDisplay nodeData={nodeDescriptionsData} selectedOption={selectedOption} />}
@@ -77,7 +82,7 @@ function App() {
       )}
     </div>
   );
-}
+};
 
 ReactDOM.render(
   <React.StrictMode>
@@ -85,6 +90,8 @@ ReactDOM.render(
   </React.StrictMode>,
   document.getElementById('root')
 );
+
+
 
 
 

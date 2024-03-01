@@ -470,33 +470,30 @@ let total_risk: string[];
   console.log("total_risk:", total_risk)
 }*/
 
-function fetch_neighbor_traversal() {
+export async function fetch_neighbor_traversal() {
   const start_node = start_node_input.value;
   const start_distance = Number(distance_input.value);
   const dataSet = document.getElementById('data-select') as HTMLSelectElement;
   const data_type = dataSet.value;
-  console.log(data_type);
 
-  // return the Promise Chain
-  return fetch('https://jwilson9567.pythonanywhere.com/calc', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ start_node, start_distance, data_type })
-  })
-  .then(response => response.json())
-  .then(data => {
-    path = data.path;
-    edge_weights = data.edge_weights;
-    total_risk = data.distance;
-
-    console.log("path:", path);
-    console.log("edge_weights:", edge_weights);
-    console.log("total_risk:", total_risk);
-  })
-  .catch(error => console.error('Error:', error));
-  console.log("wtf!!!!!")
+  try {
+    const response = await fetch('https://jwilson9567.pythonanywhere.com/calc', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ start_node, start_distance, data_type })
+    });
+    const data = await response.json();
+    return {
+      path: data.path,
+      edge_weights: data.edge_weights,
+      total_risk: data.distance
+    };
+  } catch (error) {
+    console.error('Error:', error);
+    return null;
+  }
 }
 
 const start_node_distance_graph = new Graph();
@@ -506,106 +503,107 @@ const start_node_distance_container = document.getElementById("start-node-distan
 if (start_node_input && distance_input) {
   distance_input.addEventListener("keydown", async (event) => { //make the event listener async
     if (event.key === "Enter") {
-      //await fetchData();// wait for fetchData to complete
-      await fetch_neighbor_traversal();
-      console.log("we read the data: ", path);
-      let graphWidth = 10; // Adjust this value to suit your needs
+      const data = await fetch_neighbor_traversal();
+      if (data !== null) {
+        console.log("we read the data: ", data.path);
+        let graphWidth = 10; // Adjust this value to suit your needs
 
-      // Clear the distance graph before adding nodes
-      start_node_distance_graph.clear();
+        // Clear the distance graph before adding nodes
+        start_node_distance_graph.clear();
 
-      for (let i = 0; i < path.length; i++)
-      {
-        let x = (graphWidth / (path.length - 1)) * i;
-        let y = Math.random() * 4 + 5; // Add randomness to the height
-
-        // If its the first first node, make it bigger and a different color
-        if (i === 0)
+        for (let i = 0; i < data.path.length; i++)
         {
-          start_node_distance_graph.addNode(path[i], { 
-          x: x, 
-          y: y, 
-          size: 6, 
-          label: path[i], 
-          color: "red" 
-        });
-        } else 
-        {
-          start_node_distance_graph.addNode(path[i], { 
+          let x = (graphWidth / (data.path.length - 1)) * i;
+          let y = Math.random() * 4 + 5; // Add randomness to the height
+
+          // If its the first first node, make it bigger and a different color
+          if (i === 0)
+          {
+            start_node_distance_graph.addNode(data.path[i], { 
             x: x, 
             y: y, 
             size: 6, 
-            label: path[i], 
-            color: "blue" 
+            label: data.path[i], 
+            color: "red" 
+          });
+          } else 
+          {
+            start_node_distance_graph.addNode(data.path[i], { 
+              x: x, 
+              y: y, 
+              size: 6, 
+              label: data.path[i], 
+              color: "blue" 
+            });
+          }
+        }
+
+        console.log("we made it past the node read!");
+
+        // Add edges to the graph
+        for (let i = 0; i < data.path.length - 1; i++) {
+          let weight = parseFloat(data.edge_weights[i]);
+          start_node_distance_graph.addEdge(data.path[i], data.path[i + 1], {
+            id: 'e' + i,
+            source: data.path[i],
+            target: data.path[i + 1],
+            label: 'Edge' + i,
+            size: weight * 2,
+            color: '#000'
+          });
+        }
+
+        console.log("Edges added to the graph!");
+
+        // Assuming path and total_risk are defined
+        /*let path_display = document.getElementById('path-display');
+        let total_risk_display = document.getElementById('total-risk-display');
+
+        if (path_display)
+        {
+          path_display.textContent = 'Path: ' + data.path.join(' -> ');
+          console.log(path_display.textContent); // Add this line  
+        }
+
+        if (total_risk_display)
+        {
+          total_risk_display.textContent = 'Total Risk: ' + data.total_risk;
+          console.log(total_risk_display.textContent); // And this line
+        }*/
+
+        // Check if the third container element was found
+        if (!start_node_distance_container) {
+          console.error(
+          "Error: Could not find second container element on the page"
+        );
+        } else {
+          console.log("good");
+          // Check if a second Sigma instance already exists
+          if (start_node_distance_renderer) {
+            console.log("perfect!!!!");
+            // Remove the existing Sigma instance
+            start_node_distance_renderer.kill();
+            start_node_distance_renderer = null;
+        }
+
+        // Create a new Sigma instance and render the graph in the third container
+        start_node_distance_renderer = new Sigma(start_node_distance_graph, start_node_distance_container);
+
+        // Assuming single_node_renderer is initialized somewhere...
+        if (start_node_distance_renderer) {
+          (start_node_distance_renderer).on('clickNode', function(e: any) {
+            // Get the clicked node's id
+            var nodeId = e.node;
+            console.log("Clicked on node with ID:", nodeId);
+            eventEmitter.emit('nodeClicked', nodeId);
           });
         }
       }
-
-      console.log("we made it past the node read!");
-
-      // Add edges to the graph
-      for (let i = 0; i < path.length - 1; i++) {
-        let weight = parseFloat(edge_weights[i]);
-        start_node_distance_graph.addEdge(path[i], path[i + 1], {
-          id: 'e' + i,
-          source: path[i],
-          target: path[i + 1],
-          label: 'Edge' + i,
-          size: weight * 2,
-          color: '#000'
-        });
       }
-
-      console.log("Edges added to the graph!");
-
-      // Assuming path and total_risk are defined
-      let path_display = document.getElementById('path-display');
-      let total_risk_display = document.getElementById('total-risk-display');
-
-      if (path_display)
-      {
-        path_display.textContent = 'Path: ' + path.join(' -> ');
-        console.log(path_display.textContent); // Add this line  
-      }
-
-      if (total_risk_display)
-      {
-        total_risk_display.textContent = 'Total Risk: ' + total_risk;
-        console.log(total_risk_display.textContent); // And this line
-      }
-
-      // Check if the third container element was found
-      if (!start_node_distance_container) {
-        console.error(
-        "Error: Could not find second container element on the page"
-      );
-      } else {
-        console.log("good");
-        // Check if a second Sigma instance already exists
-        if (start_node_distance_renderer) {
-          console.log("perfect!!!!");
-          // Remove the existing Sigma instance
-          start_node_distance_renderer.kill();
-          start_node_distance_renderer = null;
-      }
-
-      // Create a new Sigma instance and render the graph in the third container
-      start_node_distance_renderer = new Sigma(start_node_distance_graph, start_node_distance_container);
-
-      // Assuming single_node_renderer is initialized somewhere...
-      if (start_node_distance_renderer) {
-        (start_node_distance_renderer).on('clickNode', function(e: any) {
-          // Get the clicked node's id
-          var nodeId = e.node;
-          console.log("Clicked on node with ID:", nodeId);
-          eventEmitter.emit('nodeClicked', nodeId);
-        });
-      }
-    }
-      
     }
   });
 }
+
 
 const better_traversal_input = document.getElementById("better-traversal-input") as HTMLInputElement;
 const better_distance_input = document.getElementById("better-distance-input") as HTMLInputElement;
