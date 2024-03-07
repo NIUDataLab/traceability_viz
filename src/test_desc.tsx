@@ -8,8 +8,6 @@ import RiskTraversalDescriptionPanel from './risk_visual_description'
 import NearestNeighborExtraPanel from './nearest_neighbor_extra_panel';
 import './styles.css'
 import type { Data } from './nearest_neighbor_extra_panel'; // replace with the actual file path
- // replace with the actual file path
-
 
 function App() {
   const [mode, setMode] = useState('');

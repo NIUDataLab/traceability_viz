@@ -218,6 +218,8 @@ const start_node_distance_section = document.getElementById("start-node-distance
 
 const better_traversal = document.getElementById("better-traversal-section") as HTMLInputElement;
 
+const updated_traversal = document.getElementById("updated-traversal-section") as HTMLInputElement;
+
 if (modeSelect) {
   modeSelect.addEventListener("change", () => {
     const mode = modeSelect.value;
@@ -237,6 +239,10 @@ if (modeSelect) {
     else if (mode === "better-traversal-visual")
     {
       better_traversal.style.display = "block";
+    }
+    else if (mode === "updated-traversal-visual")
+    {
+      updated_traversal.style.display = "block";
     }
 });
 }
@@ -699,7 +705,7 @@ if (better_traversal_input && better_distance_input) {
         const minRelationship = Math.min(...(Object.values(relationships) as number[]));
         const maxRelationship = Math.max(...(Object.values(relationships) as number[]));
 
-        //const colorScale = chroma.scale("YlOrRd").domain([minRelationship, maxRelationship]);
+        const colorScale = chroma.scale("YlOrRd").domain([minRelationship, maxRelationship]);
 
         // Normalize the relationship values and use them to position the nodes
         let angle = -Math.PI / 2;
@@ -730,11 +736,11 @@ if (better_traversal_input && better_distance_input) {
           const relationshipDistance = relationships[node];
 
           // Set the color of the node based on its weight
-          /*better_distance_graph.setNodeAttribute(
+          better_distance_graph.setNodeAttribute(
           node,
           "color",
           colorScale(normalizedRelationship).hex()
-          );*/
+          );
 
           // Increment the angle for the next node
           angle += angleStep;
@@ -776,19 +782,20 @@ function updateColors() {
     for (const [node, relationship] of Object.entries(relationships)) {
       if (node !== selectedNode) {
         const relationshipDistance = relationships[node];
-        if (relationshipDistance <= better_distance) {
+        /*if (relationshipDistance <= better_distance) {
           better_distance_graph.setNodeAttribute(node, "color", "green");
           greenNodes.push({ node: node, distance: relationshipDistance });
-        } else {
-          better_distance_graph.setNodeAttribute(node, "color", "red");
-          if (better_distance_graph.getNodeAttribute(node, "color") === "red") {
+        }*/
+          if (relationshipDistance >= better_distance) {
+          better_distance_graph.setNodeAttribute(node, "color", "green");
+          if (better_distance_graph.getNodeAttribute(node, "color") === "green") {
             redNodes.push({ node: node, distance: relationshipDistance });
           }
         }
       }
     }
     // Sort the redNodes and greenNodes array in ascending order of distance
-    redNodes.sort((a, b) => b.distance - a.distance);
+    /*redNodes.sort((a, b) => b.distance - a.distance);
     greenNodes.sort((a, b) => b.distance - a.distance);
     
     // Add edges between the red nodes and green nodes in order of their distance
@@ -812,7 +819,7 @@ function updateColors() {
     // Connect last red node to the first green node
     if (redNodes.length > 0 && greenNodes.length > 0 && !better_distance_graph.hasEdge(redNodes[redNodes.length - 1].node, greenNodes[0].node)) {
       better_distance_graph.addEdge(redNodes[redNodes.length - 1].node, greenNodes[0].node);
-    }
+    }*/
   }
   
   console.log("done with this iteration!!!!!");

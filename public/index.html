@@ -7,7 +7,7 @@
     <title>Sigma Graph</title>
   </head>
   <style>
-    #single-node-container, #start-node-distance-container, #better-traversal-container {
+    #single-node-container, #start-node-distance-container, #better-traversal-container, #updated-traversal-container {
       /* width: 1500px; */
       /* height: 800px; */
       width: 71%; /* Full width */
@@ -72,6 +72,7 @@
         <!--<option value="start-end-nodes">Start and end nodes</option>-->
         <option value="start-node-distance">Start node and distance</option>
         <option value="better-traversal-visual">Better Version</option>
+        <option value="updated-traversal-visual">Updated Version</option>
       </select>
       <label for="data-select">Choose the data to work with:</label>
       <select id="data-select">
@@ -136,6 +137,21 @@
     <div id="path-display"></div>
     <div id="total-risk-display"></div>
     </div>
+
+    <div id="updated-traversal-section" style="display: none;">
+      <label for="updated-traversal-input">
+        Enter a start node:
+      </label>
+      <input type="text" id="updated-traversal-input"/>
+    
+      <label for="updated-distance-input">
+        Enter a distance:
+      </label>
+      <input type="text" id="updated-distance-input"/>
+      <div id="updated-distance-input"></div>
+    </div>
+
+    <div id="root"></div>
 
       <!-- Add this to your HTML file -->
       <div id="input_node_error-message" style="color: red; display: none"></div>
