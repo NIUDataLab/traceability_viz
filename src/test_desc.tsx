@@ -8,6 +8,7 @@ import RiskTraversalDescriptionPanel from './risk_visual_description'
 import NearestNeighborExtraPanel from './nearest_neighbor_extra_panel';
 import './styles.css'
 import type { Data } from './nearest_neighbor_extra_panel'; // replace with the actual file path
+import Risk_Visual_Panel_v2 from './risk_visual_desciption_v2';
 
 function App() {
   const [mode, setMode] = useState('');
@@ -37,7 +38,7 @@ function App() {
 
   // Second useEffect hook for fetching the data
   useEffect(() => {
-    if (!selectedOption || (mode !== 'single-node' && mode !== 'better-traversal-visual' && mode !== 'start-node-distance')) {
+    if (!selectedOption || (mode !== 'single-node' && mode !== 'better-traversal-visual' && mode !== 'start-node-distance' && mode !== 'updated-traversal-visual')) {
       return;
     }
 
@@ -75,6 +76,8 @@ function App() {
           {mode === 'start-node-distance' && <NodeDisplay nodeData={nodeDescriptionsData} selectedOption={selectedOption} />}
           {mode === 'better-traversal-visual' && <RiskTraversalDescriptionPanel />}
           {mode === 'better-traversal-visual' && <NodeDisplay nodeData={nodeDescriptionsData} selectedOption={selectedOption} />}
+          {mode === 'updated-traversal-visual' && <Risk_Visual_Panel_v2 />}
+          {mode === 'updated-traversal-visual' && <NodeDisplay nodeData={nodeDescriptionsData} selectedOption={selectedOption} />}
           {/* Add similar lines for the other modes... */}
         </>
       )}

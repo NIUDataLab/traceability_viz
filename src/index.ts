@@ -227,6 +227,7 @@ if (modeSelect) {
     single_node_section.style.display = "none";
     start_node_distance_section.style.display = "none";
     better_traversal.style.display = "none";
+    updated_traversal.style.display = "none";
 
     if (mode === "single-node")
     {
@@ -952,6 +953,210 @@ async function better_fetchData() {
 
   console.log("data")
 }*/
+
+//THE START OF THE UPDATED VISUALIZATION
+
+const updated_traversal_input = document.getElementById("updated-traversal-input") as HTMLInputElement;
+const updated_distance_input = document.getElementById("updated-distance-input") as HTMLInputElement;
+
+const updated_distance_graph = new Graph();
+let updated_distance_renderer: Sigma | null;
+const updated_distance_container = document.getElementById("updated-traversal-container") as HTMLElement;
+
+//Event listener to check to see the option selected. 
+document.getElementById('data-select')?.addEventListener('change', (event) => {
+  const selectedOption = (event.target as HTMLSelectElement).value; // saving the value of the selected option
+
+  // Reset the input fields
+  updated_traversal_input.value = '';
+  updated_distance_input.value = '';
+
+  // Clear the graph
+  updated_distance_graph.clear();
+
+  // Kill the renderer if it exists
+  if (updated_distance_renderer != null)
+  {
+    updated_distance_renderer.kill();
+    updated_distance_renderer = null;
+  }
+
+  //http://127.0.0.1:5000/different.json -- for local hosting
+  //http://jwilson9567.pythonanywhere.com -- this is for online hosting
+  //this needs to be fixed to work with both CAPEC and CWE datasets still
+  //TODO the previous graph is not being killed properly
+  fetch('https://jwilson9567.pythonanywhere.com/different.json', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: `data_type=${selectedOption}`,
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);
+    // 'data' is now a JavaScript object that you can work with
+    parsed_data = data;
+
+    // Reading and adding the nodes into the single_node_graph_view
+    for (const node of Object.keys(parsed_data)) {
+      //console.log("node:", node)
+      updated_distance_graph.addNode(node, { label: node });
+    }
+  });
+});
+
+// This is the best traversal that shows meaningful nodes for now.
+// THIS IS THE ONLY SECTION NEEDING TO BE TOUCHED RIGHT NOW!!!!
+let u_relationships: { [key: string]: any }; //
+let u_selectedNode: string | undefined = undefined; //
+let updated_distance: string | null = null;
+
+if (updated_traversal_input && updated_distance_input) {
+  updated_distance_input.addEventListener("keydown", async (event) => { //make the event listener async
+    if (event.key === "Enter") {
+
+      const nodeLabel = updated_traversal_input.value; 
+      updated_distance = updated_distance_input.value;
+      let updated_distance_num: number = parseFloat(updated_distance);
+  
+      // Find a node with a matching label
+      u_selectedNode = updated_distance_graph
+        .nodes()
+        .find(
+          (node) =>
+            updated_distance_graph.getNodeAttribute(node, "label") === nodeLabel
+        );
+      if (u_selectedNode) {
+        console.log("we found the node");
+
+        // Call the resetGraph function to reset the graph
+        resetGraph(updated_distance_graph);
+        updated_distance_graph.clearEdges();
+
+        const containerWidth = updated_distance_container.offsetWidth;
+        const containerHeight = updated_distance_container.offsetHeight;
+
+        updated_distance_graph.setNodeAttribute(u_selectedNode, "x", -containerWidth / 2);
+        updated_distance_graph.setNodeAttribute(u_selectedNode, "y", -containerHeight / 2);
+
+        // Set its size and color
+        updated_distance_graph.setNodeAttribute(u_selectedNode, "size", 10);
+        updated_distance_graph.setNodeAttribute(u_selectedNode, "color", "black");
+
+        //console.log("Printing: ", parsed_data[u_selectedNode])
+        
+         // Call the updateColor function to start the rainbow fading effect
+        //updateColor(graph_distance_view, selectedNode);
+
+        // Get the relationship data for the selected node
+        u_relationships = parsed_data[u_selectedNode];
+
+        //console.log("min: ", minRelationship, ", max: ", maxRelationship);
+
+        // Calculate the minimum and maximum relationship values
+        const minRelationship = Math.min(...(Object.values(u_relationships) as number[]));
+        const maxRelationship = Math.max(...(Object.values(u_relationships) as number[]));
+
+        const colorScale = chroma.scale(['green', 'red', 'orange', 'yellow']).domain([minRelationship, maxRelationship]);
+
+        // Normalize the relationship values and use them to position the nodes
+        // Calculate the angle step for a full circle, used to evenly distribute weaknesses
+        const angleStep = 2 * Math.PI / Object.keys(u_relationships).length;
+        for (const [node, relationship] of Object.entries(u_relationships)) {
+          if (node !== u_selectedNode) {
+          // Normalize the relationship value
+          const normalizedRelationship =
+            1 - (((relationship as number) - minRelationship) /
+            (maxRelationship - minRelationship));
+
+          // Calculate the distance of the node from the selected node
+          const distance = normalizedRelationship * (containerWidth / 32);
+          console.log("distance: ", normalizedRelationship, "user_distance: ", updated_distance_num);
+
+          if (normalizedRelationship <= updated_distance_num)
+          {
+            updated_distance_graph.addEdge(u_selectedNode, node); // add edges
+
+            // Calculate the angle for this node
+            const angle = angleStep * Object.keys(u_relationships).indexOf(node) + Math.random() * 0.7; //still not a good way to go about this.
+
+            // Set the position of the nodes
+            updated_distance_graph.setNodeAttribute(
+              node,
+              "x",
+              -containerWidth / 2 + distance * Math.cos(angle)
+            );
+            updated_distance_graph.setNodeAttribute(
+              node,
+              "y",
+              -containerHeight / 2 + distance * Math.sin(angle)
+            );
+
+            const relationshipDistance = u_relationships[node];
+
+             // Set the color of the node based on its weight
+            const color = colorScale(normalizedRelationship);
+            const rgbaColor = `rgba(${color.rgb()[0]}, ${color.rgb()[1]}, ${color.rgb()[2]}, ${1 - .25 * normalizedRelationship})`;
+            updated_distance_graph.setNodeAttribute(node, "color", rgbaColor);
+
+            // Set the size of the node based on its normalized weight
+            const nodeSize = (1 - normalizedRelationship) * 10; // Adjust the multiplier as needed to get the desired range of sizes
+            updated_distance_graph.setNodeAttribute(node, "size", nodeSize);
+
+            //updated_distance_graph.setNodeAttribute(node, "borderColor", "black");
+            //updated_distance_graph.setNodeAttribute(node, "borderSize", 2);
+
+            // Set the color of the node based on its weight
+            /*updated_distance_graph.setNodeAttribute(
+            node,
+            "color",
+            colorScale(normalizedRelationship).hex()
+            );*/
+          }
+
+          // Increment the angle for the next node
+          //angle += angleStep;
+        }
+      }
+
+   // Calculate the distance of the node from the selected node
+  //const distance = Math.pow(1 - normalizedRelationship, 2) * (containerWidth / 4);
+  //updateColors();
+  console.log("Data set used: ", dataSelect.value);
+
+      // Check if the third container element was found
+      if (!updated_distance_container) {
+        console.error(
+        "Error: Could not find second container element on the page"
+      );
+      } else {
+        console.log("good");
+        // Check if a second Sigma instance already exists
+        if (updated_distance_renderer) {
+          console.log("perfect!!!!");
+          // Remove the existing Sigma instance
+          updated_distance_renderer.kill();
+          updated_distance_renderer = null;
+      }
+
+      // Create a new Sigma instance and render the graph in the third container
+      updated_distance_renderer = new Sigma(updated_distance_graph, updated_distance_container);
+
+      if (updated_distance_renderer) {
+        (updated_distance_renderer).on('clickNode', function(e: any) {
+          // Get the clicked node's id
+          var nodeId = e.node;
+          console.log("Clicked on node with ID:", nodeId);
+          eventEmitter.emit('nodeClicked', nodeId);
+        });
+      }
+    }
+    }
+  }
+  });
+}
+
 
 
 
