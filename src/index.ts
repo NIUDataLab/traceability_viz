@@ -954,7 +954,8 @@ async function better_fetchData() {
   console.log("data")
 }*/
 
-//THE START OF THE UPDATED VISUALIZATION
+// THE START OF THE UPDATED VISUALIZATION
+// THIS IS THE ONLY SECTION NEEDING TO BE TOUCHED RIGHT NOW!!!!
 
 const updated_traversal_input = document.getElementById("updated-traversal-input") as HTMLInputElement;
 const updated_distance_input = document.getElementById("updated-distance-input") as HTMLInputElement;
@@ -1007,7 +1008,6 @@ document.getElementById('data-select')?.addEventListener('change', (event) => {
 });
 
 // This is the best traversal that shows meaningful nodes for now.
-// THIS IS THE ONLY SECTION NEEDING TO BE TOUCHED RIGHT NOW!!!!
 let u_relationships: { [key: string]: any }; //
 let u_selectedNode: string | undefined = undefined; //
 let updated_distance: string | null = null;
