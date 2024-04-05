@@ -1042,65 +1042,81 @@ if (updated_traversal_input && updated_distance_input) {
       // 'data' is now a JavaScript object that you can work with
       parsed_data = data;
 
+      const clusterColors = {
+        '7PK': '#1f77b4',  // Muted Blue
+        'CERT': '#ff7f0e',  // Safety Orange
+        'CISQ': '#2ca02c',  // Cooked Asparagus Green
+        'Comprehensive Categorization': '#d62728',  // Brick Red
+        'ICS': '#9467bd',  // Muted Purple
+        'OWASP': '#8c564b',  // Chestnut Brown
+        'SEI CERT': '#e377c2',  // Raspberry Yogurt Pink
+        'SFP': '#bcbd22',  // Curry Yellow-Green
+        'The CERT': '#17becf',  // Blue-Teal
+        'Uncategorized': '#7f7f7f'  // Middle Gray
+      };      
+
       // Reading and adding the nodes into the single_node_graph_view
       for (const node of Object.keys(parsed_data)) {
+        console.log(`Node: ${node}`);
+  
+        if (parsed_data[node].clusters) {
+          console.log(`Clusters: ${parsed_data[node].clusters}`);
+        } else {
+          console.log('Clusters: undefined');
+        }
+
+        // Get the color of the first cluster
+        const firstCluster = parsed_data[node].clusters[0] as keyof typeof clusterColors;
+        const nodeColor = firstCluster in clusterColors ? clusterColors[firstCluster] : '#000000';      
+        
+        
         updated_distance_graph.addNode(node, { 
           label: node,
           score: parsed_data[node].score,
           categories: parsed_data[node].categories, 
+          clusters: parsed_data[node].clusters.join(', '),
           tag: parsed_data[node].categories.join(', '),
           x: Math.random(),  // Add an 'x' attribute
           y: Math.random()   // Add a 'y' attribute 
         });
         console.log("we did it.");
       }
-      
-      // Create a test data object
-      const testData = {
-        x: 50,
-        y: 50,
-        size: 10,
-        label: 'Test Label',
-        color: '#000000',
-        tag: 'Test Tag',
-        clusterLabel: 'Test Cluster'
-      };
 
       const testSettings: Settings = {
         labelSize: 14,
         labelFont: 'Arial',
         labelWeight: 'bold',
-        hideEdgesOnMove: true, 
-        hideLabelsOnMove: true,
-         renderLabels: true,
-         renderEdgeLabels: true,
-         defaultNodeColor: '#000000',  
-         defaultNodeType: 'circle',
-         defaultEdgeColor: '#000000',
-         defaultEdgeType: 'line',
-         edgeLabelFont: 'Arial',
-         edgeLabelSize: 12,
-         edgeLabelWeight: 'Arial',
-         stagePadding: 10,
-         labelDensity: 1,  
-         labelGridCellSize: 10, 
-         labelRenderedSizeThreshold: 8,
-         nodeReducer: null,
-         edgeReducer: null,
-         zIndex: true,
-         labelRenderer: drawLabel,
-         hoverRenderer: drawHover,
-         edgeLabelRenderer: drawEdgeLabel,
-         nodeProgramClasses: {},
-         edgeProgramClasses: {},
-         enableEdgeClickEvents: true,
-         enableEdgeWheelEvents: true,
-         enableEdgeHoverEvents: true,
-         labelColor: {
-            attribute: 'myAttribute',
-            color: '#000000', // optional
-         },
-         edgeLabelColor: {
+        hideEdgesOnMove: false, 
+        hideLabelsOnMove: false,
+        renderLabels: true,
+        renderEdgeLabels: true,
+        defaultNodeColor: '#000000',  
+        defaultNodeType: 'circle',
+        defaultEdgeColor: '#000000',
+        defaultEdgeType: 'line',
+        edgeLabelFont: 'Arial',
+        edgeLabelSize: 12,
+        edgeLabelWeight: 'Arial',
+        stagePadding: 10,
+        labelDensity: 1,  
+        labelGridCellSize: 10, 
+        labelRenderedSizeThreshold: 8,
+        nodeReducer: null,
+        edgeReducer: null,
+        zIndex: true,
+        labelRenderer: drawLabel,
+        hoverRenderer: drawHover,
+        edgeLabelRenderer: drawEdgeLabel,
+        nodeProgramClasses: {},
+        edgeProgramClasses: {},
+        enableEdgeClickEvents: true,
+        enableEdgeWheelEvents: true,
+        enableEdgeHoverEvents: true,
+        labelColor: {
+          attribute: 'myAttribute',
+          color: '#000000', // optional
+        },
+        edgeLabelColor: {
           attribute: 'myAttribute',
           color: '#000000', // optional
         },
@@ -1114,27 +1130,15 @@ if (updated_traversal_input && updated_distance_input) {
         // You can set them to their default values or any value suitable for your test
       };
 
-      // Get the 2D context from your canvas
-      const canvas = document.getElementById('test-canvas') as HTMLCanvasElement;
-      const context = canvas.getContext('2d');
-
-      // Call your functions with the test data
-      // Call your functions with the test data
-      if (context) {
-        drawHover(context, testData, testSettings as Settings);
-        drawLabel(context, testData, testSettings as Settings);
-      }
-
-      updated_distance_renderer = new Sigma(updated_distance_graph, updated_distance_container, testSettings);
+      //updated_distance_renderer = new Sigma(updated_distance_graph, updated_distance_container, testSettings);
 
       // Replace the default node renderer with the custom drawHover function
-      if (updated_distance_renderer) {
+      /*if (updated_distance_renderer) {
         const renderer = updated_distance_renderer;
         (renderer as any).on('overNode', function(e: any) {
           drawHover(e.data.renderer.contexts.hover.canvas.getContext('2d'), e.data.node, testSettings);
         });
-      }
-      
+      }*/   
 
       const nodeLabel = updated_traversal_input.value; 
       updated_distance = updated_distance_input.value;
@@ -1190,7 +1194,7 @@ if (updated_traversal_input && updated_distance_input) {
         console.log("minimum: ", minRelationship);
         console.log("maximum: ", maxRelationship);
 
-        const colorScale = chroma.scale([ 'red', 'orange', 'yellow']).domain([minRelationship, maxRelationship]);
+        //const colorScale = chroma.scale([ 'red', 'orange', 'yellow']).domain([minRelationship, maxRelationship]);
         console.log("ok");
         // Normalize the relationship values and use them to position the nodes
         // Calculate the angle step for a full circle, used to evenly distribute weaknesses
@@ -1233,10 +1237,20 @@ if (updated_traversal_input && updated_distance_input) {
 
             const relationshipDistance = u_relationships[node];
 
-             // Set the color of the node based on its weight
-            const color = colorScale(normalizedRelationship);
-            const rgbaColor = `rgba(${color.rgb()[0]}, ${color.rgb()[1]}, ${color.rgb()[2]}, ${1 - .25 * normalizedRelationship})`;
-            updated_distance_graph.setNodeAttribute(node, "color", rgbaColor);
+            // Old color settings  
+            // Set the color of the node based on its weight
+            //const color = colorScale(normalizedRelationship);
+            //const rgbaColor = `rgba(${color.rgb()[0]}, ${color.rgb()[1]}, ${color.rgb()[2]}, ${1 - .25 * normalizedRelationship})`;
+            //updated_distance_graph.setNodeAttribute(node, "color", rgbaColor);
+
+            console.log(parsed_data[node].clusters);
+            const firstCluster = parsed_data[node].clusters[0] as keyof typeof clusterColors;
+            console.log(`First cluster: ${firstCluster}`);
+            console.log(`Is key in clusterColors: ${firstCluster in clusterColors}`);
+
+            const nodeColor = firstCluster in clusterColors ? clusterColors[firstCluster] : '#000000';  // Default to black if the cluster is not in the mapping
+            updated_distance_graph.setNodeAttribute(node, "color", nodeColor);
+                       
 
             // Set the size of the node based on its normalized weight
             const nodeSize = (1 - normalizedRelationship) * 25; // Adjust the multiplier as needed to get the desired range of sizes

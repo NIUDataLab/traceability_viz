@@ -29,6 +29,19 @@ export function drawRoundRect(
   ctx.closePath();
 }
 
+const clusterColors = {
+  '7PK': '#1f77b4',  // Muted Blue
+  'CERT': '#ff7f0e',  // Safety Orange
+  'CISQ': '#2ca02c',  // Cooked Asparagus Green
+  'Comprehensive Categorization': '#d62728',  // Brick Red
+  'ICS': '#9467bd',  // Muted Purple
+  'OWASP': '#8c564b',  // Chestnut Brown
+  'SEI CERT': '#e377c2',  // Raspberry Yogurt Pink
+  'SFP': '#bcbd22',  // Curry Yellow-Green
+  'The CERT': '#17becf',  // Blue-Teal
+  'Uncategorized': '#7f7f7f'  // Middle Gray
+};
+
 /**
  * Custom hover renderer
  */
@@ -40,7 +53,7 @@ export function drawHover(context: CanvasRenderingContext2D, data: PlainObject, 
 
   const label = data.label;
   const subLabel = data.tag !== "unknown" ? data.tag : "";
-  const clusterLabel = data.clusterLabel;
+  const clusters = data.clusters;
 
   // Then we draw the label background
   context.beginPath();
@@ -55,7 +68,7 @@ export function drawHover(context: CanvasRenderingContext2D, data: PlainObject, 
   context.font = `${weight} ${subLabelSize}px ${font}`;
   const subLabelWidth = subLabel ? context.measureText(subLabel).width : 0;
   context.font = `${weight} ${subLabelSize}px ${font}`;
-  const clusterLabelWidth = clusterLabel ? context.measureText(clusterLabel).width : 0;
+  const clusterLabelWidth = clusters ? context.measureText(clusters).width : 0;
 
   const textWidth = Math.max(labelWidth, subLabelWidth, clusterLabelWidth);
 
@@ -85,10 +98,29 @@ export function drawHover(context: CanvasRenderingContext2D, data: PlainObject, 
     context.fillText(subLabel, data.x + data.size + 3, data.y - (2 * size) / 3 - 2);
   }
 
-  context.fillStyle = data.color;
-  context.font = `${weight} ${subLabelSize}px ${font}`;
-  context.fillText(clusterLabel, data.x + data.size + 3, data.y + size / 3 + 3 + subLabelSize);
-}
+  // Draw each cluster with its color
+  if (clusters) {
+    const clusterNames = clusters.split(',');
+    let offsetX = 0;
+    for (let i = 0; i < clusterNames.length; i++) {
+      const cluster = clusterNames[i];
+      const clusterKey = cluster.trim() as keyof typeof clusterColors;
+      context.fillStyle = clusterKey in clusterColors ? clusterColors[clusterKey] : '#000000';  // Default to black if the cluster is not in the mapping
+      context.font = `${weight} ${subLabelSize}px ${font}`;
+      const clusterWidth = context.measureText(cluster).width;
+      context.fillText(cluster, data.x + data.size + 3 + offsetX, data.y + size / 3 + 3 + subLabelSize);
+      offsetX += clusterWidth;
+  
+      // Add a comma after the cluster name, unless it's the last one
+      if (i < clusterNames.length - 1) {
+        context.fillStyle = TEXT_COLOR;  // Set the color for the comma
+        const commaWidth = context.measureText(',').width;
+        context.fillText(',', data.x + data.size + 3 + offsetX, data.y + size / 3 + 3 + subLabelSize);
+        offsetX += commaWidth;
+      }
+    }
+  }
+}  
 
 /**
  * Custom label renderer
