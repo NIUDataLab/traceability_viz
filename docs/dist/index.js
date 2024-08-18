@@ -34,7 +34,7 @@ let parsed_data;
 let node_descriptions_data;
 let single_node_renderer;
 document.getElementById("data-select")?.addEventListener("change", (event) => {
-  const selectedOption = event.target.value;
+  const selectedOption2 = event.target.value;
   single_node_legend.style.display = "none";
   document.getElementById("single-node-input").value = "";
   single_node_graph_view.clear();
@@ -57,7 +57,7 @@ document.getElementById("data-select")?.addEventListener("change", (event) => {
   if (totalRiskDisplay) {
     totalRiskDisplay.innerHTML = "";
   }
-  if (!selectedOption) {
+  if (!selectedOption2) {
     alert("Please choose a data set to work with!");
     return;
   }
@@ -66,7 +66,7 @@ document.getElementById("data-select")?.addEventListener("change", (event) => {
     headers: {
       "Content-Type": "application/x-www-form-urlencoded"
     },
-    body: `data_type=${selectedOption}`
+    body: `data_type=${selectedOption2}`
   }).then((response) => response.json()).then((data) => {
     console.log(data);
     parsed_data = data;
@@ -79,7 +79,7 @@ document.getElementById("data-select")?.addEventListener("change", (event) => {
     headers: {
       "Content-Type": "application/x-www-form-urlencoded"
     },
-    body: `data_type=${selectedOption}`
+    body: `data_type=${selectedOption2}`
   }).then((response) => response.json()).then((data) => {
     console.log("Printing descriptions for all nodes: ");
     console.log(data);
@@ -91,18 +91,22 @@ const modeSelect = document.querySelector("#mode-select");
 const single_node_section = document.getElementById("single-node-section");
 const start_node_distance_section = document.getElementById("start-node-distance-section");
 const better_traversal = document.getElementById("better-traversal-section");
+const updated_traversal = document.getElementById("updated-traversal-section");
 if (modeSelect) {
   modeSelect.addEventListener("change", () => {
     const mode = modeSelect.value;
     single_node_section.style.display = "none";
     start_node_distance_section.style.display = "none";
     better_traversal.style.display = "none";
+    updated_traversal.style.display = "none";
     if (mode === "single-node") {
       single_node_section.style.display = "block";
     } else if (mode === "start-node-distance") {
       start_node_distance_section.style.display = "block";
     } else if (mode === "better-traversal-visual") {
       better_traversal.style.display = "block";
+    } else if (mode === "updated-traversal-visual") {
+      updated_traversal.style.display = "block";
     }
   });
 }
@@ -177,23 +181,29 @@ const distance_input = document.getElementById("distance-input");
 let path;
 let edge_weights;
 let total_risk;
-async function fetchData() {
+export async function fetch_neighbor_traversal() {
   const start_node = start_node_input.value;
   const start_distance = Number(distance_input.value);
-  const response = await fetch("https://jwilson9567.pythonanywhere.com/calc", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({start_node, start_distance})
-  });
-  const data = await response.json();
-  path = data.path;
-  edge_weights = data.edge_weights;
-  total_risk = data.distance;
-  console.log("path:", path);
-  console.log("edge_weights:", edge_weights);
-  console.log("total_risk:", total_risk);
+  const dataSet = document.getElementById("data-select");
+  const data_type = dataSet.value;
+  try {
+    const response = await fetch("https://jwilson9567.pythonanywhere.com/calc", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({start_node, start_distance, data_type})
+    });
+    const data = await response.json();
+    return {
+      path: data.path,
+      edge_weights: data.edge_weights,
+      total_risk: data.distance
+    };
+  } catch (error) {
+    console.error("Error:", error);
+    return null;
+  }
 }
 const start_node_distance_graph = new Graph();
 let start_node_distance_renderer;
@@ -201,64 +211,63 @@ const start_node_distance_container = document.getElementById("start-node-distan
 if (start_node_input && distance_input) {
   distance_input.addEventListener("keydown", async (event) => {
     if (event.key === "Enter") {
-      await fetchData();
-      console.log("we read the data: ", path);
-      let graphWidth = 10;
-      start_node_distance_graph.clear();
-      for (let i = 0; i < path.length; i++) {
-        let x = graphWidth / (path.length - 1) * i;
-        let y = Math.random() * 4 + 5;
-        if (i === 0) {
-          start_node_distance_graph.addNode(path[i], {
-            x,
-            y,
-            size: 6,
-            label: path[i],
-            color: "red"
+      const data = await fetch_neighbor_traversal();
+      if (data !== null) {
+        console.log("we read the data: ", data.path);
+        let graphWidth = 10;
+        start_node_distance_graph.clear();
+        for (let i = 0; i < data.path.length; i++) {
+          let x = graphWidth / (data.path.length - 1) * i;
+          let y = Math.random() * 4 + 5;
+          if (i === 0) {
+            start_node_distance_graph.addNode(data.path[i], {
+              x,
+              y,
+              size: 6,
+              label: data.path[i],
+              color: "red"
+            });
+          } else {
+            start_node_distance_graph.addNode(data.path[i], {
+              x,
+              y,
+              size: 6,
+              label: data.path[i],
+              color: "blue"
+            });
+          }
+        }
+        console.log("we made it past the node read!");
+        for (let i = 0; i < data.path.length - 1; i++) {
+          let weight = parseFloat(data.edge_weights[i]);
+          start_node_distance_graph.addEdge(data.path[i], data.path[i + 1], {
+            id: "e" + i,
+            source: data.path[i],
+            target: data.path[i + 1],
+            label: "Edge" + i,
+            size: weight * 2,
+            color: "#000"
           });
+        }
+        console.log("Edges added to the graph!");
+        if (!start_node_distance_container) {
+          console.error("Error: Could not find second container element on the page");
         } else {
-          start_node_distance_graph.addNode(path[i], {
-            x,
-            y,
-            size: 6,
-            label: path[i],
-            color: "blue"
-          });
+          console.log("good");
+          if (start_node_distance_renderer) {
+            console.log("perfect!!!!");
+            start_node_distance_renderer.kill();
+            start_node_distance_renderer = null;
+          }
+          start_node_distance_renderer = new Sigma(start_node_distance_graph, start_node_distance_container);
+          if (start_node_distance_renderer) {
+            start_node_distance_renderer.on("clickNode", function(e) {
+              var nodeId = e.node;
+              console.log("Clicked on node with ID:", nodeId);
+              eventEmitter.emit("nodeClicked", nodeId);
+            });
+          }
         }
-      }
-      console.log("we made it past the node read!");
-      for (let i = 0; i < path.length - 1; i++) {
-        let weight = parseFloat(edge_weights[i]);
-        start_node_distance_graph.addEdge(path[i], path[i + 1], {
-          id: "e" + i,
-          source: path[i],
-          target: path[i + 1],
-          label: "Edge" + i,
-          size: weight * 2,
-          color: "#000"
-        });
-      }
-      console.log("Edges added to the graph!");
-      let path_display = document.getElementById("path-display");
-      let total_risk_display = document.getElementById("total-risk-display");
-      if (path_display) {
-        path_display.textContent = "Path: " + path.join(" -> ");
-        console.log(path_display.textContent);
-      }
-      if (total_risk_display) {
-        total_risk_display.textContent = "Total Risk: " + total_risk;
-        console.log(total_risk_display.textContent);
-      }
-      if (!start_node_distance_container) {
-        console.error("Error: Could not find second container element on the page");
-      } else {
-        console.log("good");
-        if (start_node_distance_renderer) {
-          console.log("perfect!!!!");
-          start_node_distance_renderer.kill();
-          start_node_distance_renderer = null;
-        }
-        start_node_distance_renderer = new Sigma(start_node_distance_graph, start_node_distance_container);
       }
     }
   });
@@ -269,7 +278,7 @@ const better_distance_graph = new Graph();
 let better_distance_renderer;
 const better_distance_container = document.getElementById("better-traversal-container");
 document.getElementById("data-select")?.addEventListener("change", (event) => {
-  const selectedOption = event.target.value;
+  const selectedOption2 = event.target.value;
   better_traversal_input.value = "";
   better_distance_input.value = "";
   better_distance_graph.clear();
@@ -282,7 +291,7 @@ document.getElementById("data-select")?.addEventListener("change", (event) => {
     headers: {
       "Content-Type": "application/x-www-form-urlencoded"
     },
-    body: `data_type=${selectedOption}`
+    body: `data_type=${selectedOption2}`
   }).then((response) => response.json()).then((data) => {
     console.log(data);
     parsed_data = data;
@@ -312,6 +321,7 @@ if (better_traversal_input && better_distance_input) {
         relationships = parsed_data[selectedNode];
         const minRelationship = Math.min(...Object.values(relationships));
         const maxRelationship = Math.max(...Object.values(relationships));
+        const colorScale = chroma.scale("YlOrRd").domain([minRelationship, maxRelationship]);
         let angle = -Math.PI / 2;
         const angleStep = Math.PI / (2 * Object.keys(relationships).length);
         for (const [node, relationship] of Object.entries(relationships)) {
@@ -321,6 +331,7 @@ if (better_traversal_input && better_distance_input) {
             better_distance_graph.setNodeAttribute(node, "x", -containerWidth / 2 + distance2 * Math.cos(angle));
             better_distance_graph.setNodeAttribute(node, "y", -containerHeight / 2 + distance2 * Math.sin(angle));
             const relationshipDistance = relationships[node];
+            better_distance_graph.setNodeAttribute(node, "color", colorScale(normalizedRelationship).hex());
             angle += angleStep;
           }
         }
@@ -348,35 +359,214 @@ function updateColors() {
     for (const [node, relationship] of Object.entries(relationships)) {
       if (node !== selectedNode) {
         const relationshipDistance = relationships[node];
-        if (relationshipDistance <= better_distance) {
+        if (relationshipDistance >= better_distance) {
           better_distance_graph.setNodeAttribute(node, "color", "green");
-          greenNodes.push({node, distance: relationshipDistance});
-        } else {
-          better_distance_graph.setNodeAttribute(node, "color", "red");
-          if (better_distance_graph.getNodeAttribute(node, "color") === "red") {
+          if (better_distance_graph.getNodeAttribute(node, "color") === "green") {
             redNodes.push({node, distance: relationshipDistance});
           }
         }
       }
     }
-    redNodes.sort((a, b) => b.distance - a.distance);
-    greenNodes.sort((a, b) => b.distance - a.distance);
-    for (let i = 0; i < redNodes.length - 1; i++) {
-      if (!better_distance_graph.hasEdge(redNodes[i].node, redNodes[i + 1].node)) {
-        let edgeId = better_distance_graph.addEdge(redNodes[i].node, redNodes[i + 1].node);
-      }
-    }
-    for (let i = 0; i < greenNodes.length - 1; i++) {
-      if (!better_distance_graph.hasEdge(greenNodes[i].node, greenNodes[i + 1].node)) {
-        let edgeId = better_distance_graph.addEdge(greenNodes[i].node, greenNodes[i + 1].node);
-      }
-    }
-    if (redNodes.length > 0 && !better_distance_graph.hasEdge(selectedNode, redNodes[0].node)) {
-      better_distance_graph.addEdge(selectedNode, redNodes[0].node);
-    }
-    if (redNodes.length > 0 && greenNodes.length > 0 && !better_distance_graph.hasEdge(redNodes[redNodes.length - 1].node, greenNodes[0].node)) {
-      better_distance_graph.addEdge(redNodes[redNodes.length - 1].node, greenNodes[0].node);
-    }
   }
   console.log("done with this iteration!!!!!");
+}
+import {drawHover, drawLabel} from "./canvas-utils.js";
+import drawEdgeLabel from "../_snowpack/pkg/sigma/rendering/canvas/edge-label.js";
+const updated_traversal_input = document.getElementById("updated-traversal-input");
+const updated_distance_input = document.getElementById("updated-distance-input");
+const updated_distance_graph = new Graph();
+let updated_distance_renderer;
+const updated_distance_container = document.getElementById("updated-traversal-container");
+let selectedOption = void 0;
+document.getElementById("data-select")?.addEventListener("change", (event) => {
+  selectedOption = event.target.value;
+  updated_traversal_input.value = "";
+  updated_distance_input.value = "";
+  updated_distance_graph.clear();
+  if (updated_distance_renderer != null) {
+    updated_distance_renderer.kill();
+    updated_distance_renderer = null;
+  }
+});
+let u_relationships;
+let u_selectedNode = void 0;
+let updated_distance = null;
+if (updated_traversal_input && updated_distance_input) {
+  updated_distance_input.addEventListener("keydown", async (event) => {
+    if (event.key === "Enter") {
+      updated_distance_graph.clear();
+      if (updated_distance_renderer != null) {
+        updated_distance_renderer.kill();
+      }
+      let distanceValue = parseFloat(updated_distance_input.value);
+      if (isNaN(distanceValue)) {
+        console.error("Invalid distance value");
+        return;
+      }
+      let startNode = updated_traversal_input.value;
+      console.log(selectedOption);
+      let response = await fetch("https://jwilson9567.pythonanywhere.com/filtered.json", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: `data_type=${selectedOption}&distance=${distanceValue}&start_node=${startNode}`
+      });
+      if (!response.ok) {
+        console.error("Fetch request failed:", response.status, response.statusText);
+        return;
+      }
+      let data = await response.json();
+      console.log(data);
+      parsed_data = data;
+      const clusterColors = {
+        "7PK": "#1f77b4",
+        CERT: "#ff7f0e",
+        CISQ: "#2ca02c",
+        "Comprehensive Categorization": "#d62728",
+        ICS: "#9467bd",
+        OWASP: "#8c564b",
+        "SEI CERT": "#e377c2",
+        SFP: "#bcbd22",
+        "The CERT": "#17becf",
+        Uncategorized: "#7f7f7f"
+      };
+      for (const node of Object.keys(parsed_data)) {
+        console.log(`Node: ${node}`);
+        if (parsed_data[node].clusters) {
+          console.log(`Clusters: ${parsed_data[node].clusters}`);
+        } else {
+          console.log("Clusters: undefined");
+        }
+        const firstCluster = parsed_data[node].clusters[0];
+        const nodeColor = firstCluster in clusterColors ? clusterColors[firstCluster] : "#000000";
+        updated_distance_graph.addNode(node, {
+          label: node,
+          score: parsed_data[node].score,
+          categories: parsed_data[node].categories,
+          clusters: parsed_data[node].clusters.join(", "),
+          tag: parsed_data[node].categories.join(", "),
+          x: Math.random(),
+          y: Math.random()
+        });
+        console.log("we did it.");
+      }
+      const testSettings = {
+        labelSize: 14,
+        labelFont: "Arial",
+        labelWeight: "bold",
+        hideEdgesOnMove: false,
+        hideLabelsOnMove: false,
+        renderLabels: true,
+        renderEdgeLabels: true,
+        defaultNodeColor: "#000000",
+        defaultNodeType: "circle",
+        defaultEdgeColor: "#000000",
+        defaultEdgeType: "line",
+        edgeLabelFont: "Arial",
+        edgeLabelSize: 12,
+        edgeLabelWeight: "Arial",
+        stagePadding: 10,
+        labelDensity: 1,
+        labelGridCellSize: 10,
+        labelRenderedSizeThreshold: 8,
+        nodeReducer: null,
+        edgeReducer: null,
+        zIndex: true,
+        labelRenderer: drawLabel,
+        hoverRenderer: drawHover,
+        edgeLabelRenderer: drawEdgeLabel,
+        nodeProgramClasses: {},
+        edgeProgramClasses: {},
+        enableEdgeClickEvents: true,
+        enableEdgeWheelEvents: true,
+        enableEdgeHoverEvents: true,
+        labelColor: {
+          attribute: "myAttribute",
+          color: "#000000"
+        },
+        edgeLabelColor: {
+          attribute: "myAttribute",
+          color: "#000000"
+        },
+        zoomToSizeRatioFunction: (ratio) => ratio,
+        itemSizesReference: "screen",
+        minCameraRatio: null,
+        maxCameraRatio: null,
+        allowInvalidContainer: false,
+        nodeHoverProgramClasses: {}
+      };
+      const nodeLabel = updated_traversal_input.value;
+      updated_distance = updated_distance_input.value;
+      let updated_distance_num = parseFloat(updated_distance);
+      console.log("continuing");
+      u_selectedNode = updated_distance_graph.nodes().find((node) => updated_distance_graph.getNodeAttribute(node, "label") === nodeLabel);
+      if (u_selectedNode) {
+        console.log("we found the node");
+        console.log("selected node: ", u_selectedNode);
+        resetGraph(updated_distance_graph);
+        updated_distance_graph.clearEdges();
+        const containerWidth = updated_distance_container.offsetWidth;
+        const containerHeight = updated_distance_container.offsetHeight;
+        updated_distance_graph.setNodeAttribute(u_selectedNode, "x", -containerWidth / 2);
+        updated_distance_graph.setNodeAttribute(u_selectedNode, "y", -containerHeight / 2);
+        updated_distance_graph.setNodeAttribute(u_selectedNode, "size", 30);
+        updated_distance_graph.setNodeAttribute(u_selectedNode, "color", "black");
+        u_relationships = {};
+        for (const node of Object.keys(parsed_data)) {
+          u_relationships[node] = parsed_data[node].score;
+        }
+        const maxRelationship = Math.max(...Object.values(u_relationships));
+        const minRelationship = -0.09953586757183075;
+        console.log("minimum: ", minRelationship);
+        console.log("maximum: ", maxRelationship);
+        console.log("ok");
+        const angleStep = 2 * Math.PI / Object.keys(u_relationships).length;
+        console.log("parsed data: ", parsed_data);
+        console.log("u_relationships:", u_relationships);
+        for (const [node, relationship] of Object.entries(u_relationships)) {
+          if (node !== u_selectedNode) {
+            console.log("we are now normalizing.");
+            const normalizedRelationship = 1 - (relationship - minRelationship) / (maxRelationship - minRelationship) - 0.15;
+            const distance2 = normalizedRelationship * (containerWidth / 32);
+            console.log("distance: ", normalizedRelationship, "user_distance: ", updated_distance_num);
+            if (normalizedRelationship <= updated_distance_num) {
+              updated_distance_graph.addEdge(u_selectedNode, node);
+              const angle = angleStep * Object.keys(u_relationships).indexOf(node) + Math.random() * 0.7;
+              updated_distance_graph.setNodeAttribute(node, "x", -containerWidth / 2 + distance2 * Math.cos(angle));
+              updated_distance_graph.setNodeAttribute(node, "y", -containerHeight / 2 + distance2 * Math.sin(angle));
+              const relationshipDistance = u_relationships[node];
+              console.log(parsed_data[node].clusters);
+              const firstCluster = parsed_data[node].clusters[0];
+              console.log(`First cluster: ${firstCluster}`);
+              console.log(`Is key in clusterColors: ${firstCluster in clusterColors}`);
+              const nodeColor = firstCluster in clusterColors ? clusterColors[firstCluster] : "#000000";
+              updated_distance_graph.setNodeAttribute(node, "color", nodeColor);
+              const nodeSize = (1 - normalizedRelationship) * 25;
+              updated_distance_graph.setNodeAttribute(node, "size", nodeSize);
+            }
+          }
+        }
+        console.log("Data set used: ", dataSelect.value);
+        if (!updated_distance_container) {
+          console.log("Error: Could not find second container element on the page");
+        } else {
+          console.log("good");
+          if (updated_distance_renderer) {
+            console.log("perfect!!!!");
+            updated_distance_renderer.kill();
+            updated_distance_renderer = null;
+          }
+          updated_distance_renderer = new Sigma(updated_distance_graph, updated_distance_container, testSettings);
+          if (updated_distance_renderer) {
+            updated_distance_renderer.on("clickNode", function(e) {
+              var nodeId = e.node;
+              console.log("Clicked on node with ID:", nodeId);
+              eventEmitter.emit("nodeClicked", nodeId);
+            });
+          }
+        }
+      }
+    }
+  });
 }
